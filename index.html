@@ -14,85 +14,71 @@
   --green:#059669; --green-light:#ecfdf5; --green-dark:#047857;
   --red:#dc2626; --red-light:#fef2f2; --red-dark:#b91c1c;
   --yellow:#d97706; --yellow-light:#fffbeb;
-  --orange:#ea580c; --orange-light:#fff7ed;
-  --purple:#7c3aed; --purple-light:#f5f3ff;
-  --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06);
-  --shadow-md: 0 4px 6px rgba(0,0,0,0.07), 0 2px 4px rgba(0,0,0,0.06);
-  --shadow-lg: 0 10px 15px rgba(0,0,0,0.08), 0 4px 6px rgba(0,0,0,0.05);
+  --orange:#ea580c;
+  --purple:#7c3aed;
+  --shadow:0 1px 3px rgba(0,0,0,0.08),0 1px 2px rgba(0,0,0,0.06);
+  --shadow-md:0 4px 6px rgba(0,0,0,0.07),0 2px 4px rgba(0,0,0,0.06);
   --radius:12px; --radius-sm:8px;
 }
 body { font-family:'Segoe UI',system-ui,-apple-system,sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
 
-/* ─── HEADER ─────────────────────────────────────────────────────── */
+/* HEADER */
 header {
   background:var(--white); border-bottom:1px solid var(--border);
   padding:0 32px; display:flex; justify-content:space-between;
-  align-items:center; flex-wrap:wrap; gap:12px; height:64px;
-  box-shadow:var(--shadow);
+  align-items:center; height:64px; box-shadow:var(--shadow);
 }
 .logo { display:flex; align-items:center; gap:10px; }
 .logo-icon { font-size:26px; }
-.logo h1 { font-size:18px; font-weight:800; color:var(--primary); letter-spacing:-0.3px; }
+.logo h1 { font-size:18px; font-weight:800; color:var(--primary); }
 .logo p { font-size:11px; color:var(--muted); margin-top:1px; }
-
-.api-bar { display:flex; align-items:center; gap:8px; }
-.api-bar label { font-size:12px; font-weight:600; color:var(--text2); }
-.api-wrap { position:relative; }
-.api-wrap input {
-  background:var(--surface); border:1.5px solid var(--border2);
-  border-radius:var(--radius-sm); padding:8px 36px 8px 12px;
-  color:var(--text); font-size:13px; width:260px; transition:border-color 0.2s;
+.header-right { display:flex; align-items:center; gap:10px; }
+.status-dot {
+  width:8px; height:8px; border-radius:50%; background:var(--green);
+  box-shadow:0 0 0 3px rgba(5,150,105,0.2);
+  animation:pulse 2s infinite;
 }
-.api-wrap input:focus { outline:none; border-color:var(--primary); }
-.api-eye { position:absolute; right:10px; top:50%; transform:translateY(-50%); background:none; border:none; cursor:pointer; font-size:14px; color:var(--muted); }
-.api-status { font-size:11px; padding:4px 10px; border-radius:20px; font-weight:700; white-space:nowrap; }
-.api-status.ok { background:var(--green-light); color:var(--green); }
-.api-status.bad { background:var(--red-light); color:var(--red); }
+@keyframes pulse { 0%,100%{ box-shadow:0 0 0 3px rgba(5,150,105,0.2); } 50%{ box-shadow:0 0 0 6px rgba(5,150,105,0.1); } }
+.status-label { font-size:12px; font-weight:600; color:var(--green); }
 
-/* ─── LAYOUT ─────────────────────────────────────────────────────── */
+/* LAYOUT */
 .main { display:grid; grid-template-columns:300px 1fr; min-height:calc(100vh - 64px); }
 @media(max-width:768px){ .main{ grid-template-columns:1fr; } }
 
-/* ─── SIDEBAR ────────────────────────────────────────────────────── */
+/* SIDEBAR */
 .sidebar {
   background:var(--white); border-right:1px solid var(--border);
-  padding:20px; display:flex; flex-direction:column; gap:18px;
-  overflow-y:auto;
+  padding:20px; display:flex; flex-direction:column; gap:18px; overflow-y:auto;
 }
 .sidebar-section h3 {
   font-size:11px; font-weight:700; text-transform:uppercase;
   letter-spacing:1px; color:var(--muted); margin-bottom:10px;
 }
-
 .drop-zone {
   border:2px dashed var(--border2); border-radius:var(--radius);
   padding:22px 14px; text-align:center; cursor:pointer;
   transition:all 0.2s; background:var(--surface);
 }
-.drop-zone:hover, .drop-zone.drag { border-color:var(--primary); background:var(--primary-light); }
-.drop-zone .dz-icon { font-size:32px; margin-bottom:8px; }
-.drop-zone .dz-title { font-size:13px; font-weight:600; color:var(--text); margin-bottom:4px; }
-.drop-zone .dz-sub { font-size:11px; color:var(--muted); }
-.drop-zone .dz-types { font-size:11px; color:var(--primary); font-weight:600; margin-top:4px; }
+.drop-zone:hover,.drop-zone.drag { border-color:var(--primary); background:var(--primary-light); }
+.dz-icon { font-size:32px; margin-bottom:8px; }
+.dz-title { font-size:13px; font-weight:600; color:var(--text); margin-bottom:4px; }
+.dz-sub { font-size:11px; color:var(--muted); }
+.dz-types { font-size:11px; color:var(--primary); font-weight:600; margin-top:4px; }
 
 .file-list { display:flex; flex-direction:column; gap:5px; }
 .file-item {
-  background:var(--surface); border:1px solid var(--border);
-  border-radius:var(--radius-sm); padding:7px 10px;
-  font-size:12px; display:flex; justify-content:space-between;
-  align-items:center; gap:6px;
+  background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-sm);
+  padding:7px 10px; font-size:12px; display:flex; justify-content:space-between; align-items:center; gap:6px;
 }
-.file-item-name { color:var(--primary); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-weight:500; }
+.file-name { color:var(--primary); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-weight:500; }
 .file-size { color:var(--muted); font-size:10px; flex-shrink:0; }
-.file-remove { background:none; border:none; color:var(--red); cursor:pointer; font-size:15px; flex-shrink:0; line-height:1; padding:0 2px; }
+.file-rm { background:none; border:none; color:var(--red); cursor:pointer; font-size:15px; flex-shrink:0; }
 .no-files { font-size:12px; color:var(--muted); text-align:center; padding:8px 0; }
 
 .option-grid { display:grid; gap:6px; }
 .option-item {
-  display:flex; align-items:center; gap:9px;
-  background:var(--surface); border:1px solid var(--border);
-  border-radius:var(--radius-sm); padding:9px 11px; cursor:pointer;
-  transition:border-color 0.15s;
+  display:flex; align-items:center; gap:9px; background:var(--surface);
+  border:1px solid var(--border); border-radius:var(--radius-sm); padding:9px 11px; cursor:pointer;
 }
 .option-item:hover { border-color:var(--primary); }
 .option-item input[type=checkbox] { accent-color:var(--primary); width:14px; height:14px; flex-shrink:0; }
@@ -100,12 +86,11 @@ header {
 
 .analyze-btn {
   width:100%; background:var(--primary); color:white; border:none;
-  padding:13px; border-radius:var(--radius); font-size:14px;
-  font-weight:700; cursor:pointer; transition:all 0.2s; letter-spacing:0.2px;
-  box-shadow:0 2px 4px rgba(37,99,235,0.3);
+  padding:13px; border-radius:var(--radius); font-size:14px; font-weight:700;
+  cursor:pointer; transition:all 0.2s; box-shadow:0 2px 4px rgba(37,99,235,0.3);
 }
-.analyze-btn:hover:not(:disabled) { background:var(--primary-dark); transform:translateY(-1px); box-shadow:0 4px 8px rgba(37,99,235,0.35); }
-.analyze-btn:disabled { opacity:0.4; cursor:not-allowed; transform:none; box-shadow:none; }
+.analyze-btn:hover:not(:disabled) { background:var(--primary-dark); transform:translateY(-1px); }
+.analyze-btn:disabled { opacity:0.4; cursor:not-allowed; transform:none; }
 
 .chat-btn {
   width:100%; background:var(--white); border:1.5px solid var(--primary);
@@ -115,34 +100,30 @@ header {
 .chat-btn:hover:not(:disabled) { background:var(--primary-light); }
 .chat-btn:disabled { opacity:0.35; cursor:not-allowed; }
 
-/* ─── CONTENT ────────────────────────────────────────────────────── */
+/* CONTENT */
 .content { padding:24px; overflow-y:auto; }
 
-/* ─── WELCOME ────────────────────────────────────────────────────── */
+/* WELCOME */
 .welcome { text-align:center; padding:48px 20px; max-width:620px; margin:0 auto; }
-.welcome .w-icon { font-size:56px; margin-bottom:16px; }
+.w-icon { font-size:56px; margin-bottom:16px; }
 .welcome h2 { font-size:26px; font-weight:800; color:var(--text); margin-bottom:10px; }
-.welcome p { color:var(--text2); font-size:14px; line-height:1.7; margin-bottom:28px; }
-.steps-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; text-align:left; }
-.step-card {
-  background:var(--white); border:1px solid var(--border);
-  border-radius:var(--radius); padding:16px; box-shadow:var(--shadow);
-}
+.welcome > p { color:var(--text2); font-size:14px; line-height:1.7; margin-bottom:28px; }
+.steps-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; text-align:left; }
+.step-card { background:var(--white); border:1px solid var(--border); border-radius:var(--radius); padding:16px; box-shadow:var(--shadow); }
 .step-num {
   width:24px; height:24px; background:var(--primary); color:white;
-  border-radius:50%; font-size:12px; font-weight:800; display:flex;
-  align-items:center; justify-content:center; margin-bottom:10px;
+  border-radius:50%; font-size:12px; font-weight:800;
+  display:flex; align-items:center; justify-content:center; margin-bottom:10px;
 }
 .step-card h4 { font-size:13px; font-weight:700; color:var(--text); margin-bottom:5px; }
 .step-card p { font-size:12px; color:var(--text2); line-height:1.5; }
 .privacy-note {
-  display:inline-flex; align-items:center; gap:6px;
-  margin-top:20px; font-size:12px; color:var(--muted);
-  background:var(--surface); border:1px solid var(--border);
-  border-radius:20px; padding:6px 14px;
+  display:inline-flex; align-items:center; gap:6px; margin-top:20px;
+  font-size:12px; color:var(--muted); background:var(--surface);
+  border:1px solid var(--border); border-radius:20px; padding:6px 14px;
 }
 
-/* ─── LOADING ────────────────────────────────────────────────────── */
+/* LOADING */
 .loading-screen { text-align:center; padding:80px 20px; display:none; }
 .spinner {
   width:48px; height:48px; border:3px solid var(--border2);
@@ -150,44 +131,31 @@ header {
   animation:spin 0.7s linear infinite; margin:0 auto 20px;
 }
 @keyframes spin{ to{ transform:rotate(360deg); } }
-.loading-screen h3 { font-size:18px; font-weight:700; color:var(--text); margin-bottom:6px; }
+.loading-screen h3 { font-size:18px; font-weight:700; margin-bottom:6px; }
 .loading-screen p { color:var(--muted); font-size:13px; }
 .prog-list { max-width:300px; margin:24px auto 0; display:flex; flex-direction:column; gap:7px; }
 .prog-item { display:flex; align-items:center; gap:9px; font-size:13px; color:var(--muted); text-align:left; }
 .prog-item.done { color:var(--green); }
 .prog-item.active { color:var(--primary); font-weight:600; }
 
-/* ─── RESULTS ────────────────────────────────────────────────────── */
+/* RESULTS */
 .results { display:none; }
-
-/* stat row */
 .stat-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin-bottom:20px; }
-.stat-card {
-  background:var(--white); border:1px solid var(--border);
-  border-radius:var(--radius); padding:16px; text-align:center;
-  box-shadow:var(--shadow);
-}
+.stat-card { background:var(--white); border:1px solid var(--border); border-radius:var(--radius); padding:16px; text-align:center; box-shadow:var(--shadow); }
 .s-label { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.8px; color:var(--muted); margin-bottom:6px; }
 .s-val { font-size:22px; font-weight:800; }
 .s-sub { font-size:10px; color:var(--muted); margin-top:3px; }
 
-/* section card */
-.card {
-  background:var(--white); border:1px solid var(--border);
-  border-radius:var(--radius); padding:20px; margin-bottom:16px;
-  box-shadow:var(--shadow);
-}
+.card { background:var(--white); border:1px solid var(--border); border-radius:var(--radius); padding:20px; margin-bottom:16px; box-shadow:var(--shadow); }
 .card.alert-red { border-color:#fca5a5; border-left:4px solid var(--red); }
 .card.alert-yellow { border-left:4px solid var(--yellow); }
 .card-title { font-size:15px; font-weight:700; color:var(--text); margin-bottom:14px; display:flex; align-items:center; gap:8px; }
-.card-title .ct-count { font-size:11px; background:var(--surface); border:1px solid var(--border); border-radius:20px; padding:2px 9px; color:var(--text2); font-weight:600; }
+.ct-count { font-size:11px; background:var(--surface); border:1px solid var(--border); border-radius:20px; padding:2px 9px; color:var(--text2); font-weight:600; }
 
-/* sub items */
 .sub-row {
-  background:var(--surface); border:1px solid var(--border);
-  border-radius:var(--radius-sm); padding:12px 14px; margin-bottom:8px;
-  display:flex; justify-content:space-between; align-items:flex-start;
-  border-left:3px solid var(--border2); transition:box-shadow 0.15s;
+  background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-sm);
+  padding:12px 14px; margin-bottom:8px; display:flex; justify-content:space-between;
+  align-items:flex-start; border-left:3px solid var(--border2); transition:box-shadow 0.15s;
 }
 .sub-row:hover { box-shadow:var(--shadow-md); }
 .sub-row.risk-high { border-left-color:var(--red); }
@@ -197,34 +165,20 @@ header {
 .sub-reason { font-size:11px; color:var(--text2); line-height:1.4; }
 .sub-cancel-url { font-size:11px; color:var(--primary); font-weight:600; margin-top:3px; }
 .sub-right { text-align:right; flex-shrink:0; margin-left:12px; }
-.sub-amt { font-size:14px; font-weight:800; color:var(--text); }
+.sub-amt { font-size:14px; font-weight:800; }
 .sub-annual { font-size:10px; color:var(--muted); margin-top:1px; }
 .pill { display:inline-block; font-size:10px; padding:2px 9px; border-radius:20px; margin-top:5px; font-weight:700; }
 .pill-red { background:var(--red-light); color:var(--red); }
 .pill-yellow { background:var(--yellow-light); color:var(--yellow); }
 .pill-green { background:var(--green-light); color:var(--green); }
 
-/* savings box */
-.savings-box {
-  background:linear-gradient(135deg,#ecfdf5,#d1fae5);
-  border:1px solid #a7f3d0; border-radius:var(--radius);
-  padding:16px; text-align:center; margin-top:12px;
-}
+.savings-box { background:linear-gradient(135deg,#ecfdf5,#d1fae5); border:1px solid #a7f3d0; border-radius:var(--radius); padding:16px; text-align:center; margin-top:12px; }
 .savings-box .big-num { font-size:28px; font-weight:900; color:var(--green); }
 .savings-box p { font-size:12px; color:var(--green-dark); margin-top:3px; }
 
-/* ACTION PLAN */
 .action-grid { display:grid; gap:10px; }
-.action-item {
-  background:var(--surface); border:1px solid var(--border);
-  border-radius:var(--radius-sm); padding:14px 16px;
-  display:grid; grid-template-columns:auto 1fr auto; gap:12px; align-items:start;
-}
-.action-num {
-  width:28px; height:28px; border-radius:50%; font-size:12px;
-  font-weight:800; display:flex; align-items:center; justify-content:center;
-  flex-shrink:0;
-}
+.action-item { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-sm); padding:14px 16px; display:grid; grid-template-columns:auto 1fr auto; gap:12px; align-items:start; }
+.action-num { width:28px; height:28px; border-radius:50%; font-size:12px; font-weight:800; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
 .action-num.p-high { background:var(--red-light); color:var(--red); }
 .action-num.p-medium { background:var(--yellow-light); color:var(--yellow); }
 .action-num.p-low { background:var(--green-light); color:var(--green); }
@@ -235,43 +189,28 @@ header {
 .action-step::before { content:"→"; color:var(--primary); flex-shrink:0; font-weight:700; }
 .action-saving { font-size:13px; font-weight:800; color:var(--green); flex-shrink:0; white-space:nowrap; }
 
-/* cat bars */
 .cat-item { margin-bottom:11px; }
 .cat-head { display:flex; justify-content:space-between; font-size:12px; margin-bottom:5px; font-weight:500; }
-.cat-head span:first-child { color:var(--text2); }
-.cat-head span:last-child { font-weight:700; color:var(--text); }
 .bar-bg { background:var(--border); border-radius:4px; height:7px; overflow:hidden; }
-.bar-fill { height:100%; border-radius:4px; transition:width 0.8s ease; }
+.bar-fill { height:100%; border-radius:4px; }
 
-/* hidden charges */
-.hc-row {
-  background:var(--surface); border:1px solid var(--border);
-  border-radius:var(--radius-sm); padding:12px 14px; margin-bottom:8px;
-  display:flex; justify-content:space-between; align-items:flex-start; gap:12px;
-}
+.hc-row { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-sm); padding:12px 14px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:flex-start; gap:12px; }
 .hc-name { font-size:13px; font-weight:700; color:var(--text); margin-bottom:3px; }
 .hc-detail { font-size:11px; color:var(--text2); }
 .hc-action { font-size:11px; color:var(--primary); font-weight:600; margin-top:3px; }
 .hc-amount { font-size:15px; font-weight:800; color:var(--red); flex-shrink:0; }
 
-/* insights */
-.insight-row {
-  background:var(--surface); border:1px solid var(--border);
-  border-radius:var(--radius-sm); padding:12px 14px; margin-bottom:8px;
-  display:flex; gap:12px;
-}
+.insight-row { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-sm); padding:12px 14px; margin-bottom:8px; display:flex; gap:12px; }
 .ins-icon { font-size:22px; flex-shrink:0; }
 .ins-title { font-size:13px; font-weight:700; color:var(--text); margin-bottom:3px; }
 .ins-desc { font-size:12px; color:var(--text2); line-height:1.5; }
 
-/* monthly bars */
 .month-row { display:grid; grid-template-columns:120px 1fr 90px; align-items:center; gap:10px; margin-bottom:7px; }
 .month-lbl { font-size:11px; color:var(--text2); font-weight:500; }
 .m-bar-bg { background:var(--border); border-radius:4px; height:22px; overflow:hidden; }
 .m-bar { height:100%; display:flex; align-items:center; padding-left:8px; font-size:10px; font-weight:700; color:white; border-radius:4px; }
 .m-amt { font-size:12px; font-weight:700; color:var(--text); text-align:right; }
 
-/* table */
 table { width:100%; border-collapse:collapse; font-size:12px; }
 th { text-align:left; color:var(--muted); padding:7px 10px; border-bottom:1.5px solid var(--border); font-size:10px; text-transform:uppercase; letter-spacing:0.5px; font-weight:700; }
 td { padding:9px 10px; border-bottom:1px solid var(--surface); }
@@ -279,15 +218,9 @@ tr:last-child td { border-bottom:none; }
 tr:hover td { background:var(--surface); }
 .cat-tag { font-size:10px; padding:2px 7px; border-radius:10px; background:var(--surface); color:var(--text2); border:1px solid var(--border); }
 
-/* chat */
-.chat-panel {
-  background:var(--white); border:1px solid var(--border);
-  border-radius:var(--radius); margin-bottom:16px;
-  display:none; flex-direction:column; height:380px;
-  box-shadow:var(--shadow-md);
-}
+.chat-panel { background:var(--white); border:1px solid var(--border); border-radius:var(--radius); margin-bottom:16px; display:none; flex-direction:column; height:380px; box-shadow:var(--shadow-md); }
 .chat-panel.open { display:flex; }
-.chat-header { padding:12px 16px; border-bottom:1px solid var(--border); font-size:13px; font-weight:700; color:var(--text); display:flex; justify-content:space-between; }
+.chat-header { padding:12px 16px; border-bottom:1px solid var(--border); font-size:13px; font-weight:700; color:var(--text); display:flex; justify-content:space-between; align-items:center; }
 .chat-messages { flex:1; overflow-y:auto; padding:14px; display:flex; flex-direction:column; gap:9px; }
 .chat-msg { max-width:82%; padding:9px 13px; border-radius:10px; font-size:13px; line-height:1.5; }
 .chat-msg.user { background:var(--primary); color:white; align-self:flex-end; border-radius:10px 10px 2px 10px; }
@@ -299,24 +232,17 @@ tr:hover td { background:var(--surface); }
 .chat-send { background:var(--primary); border:none; border-radius:var(--radius-sm); padding:8px 16px; color:white; font-weight:700; cursor:pointer; font-size:13px; }
 .chat-send:hover { background:var(--primary-dark); }
 
-/* error */
 .error-box { background:var(--red-light); border:1px solid #fca5a5; border-radius:var(--radius); padding:16px; color:var(--red-dark); font-size:13px; margin-bottom:16px; }
-
-/* grid 2 col */
 .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
 @media(max-width:900px){ .grid-2{ grid-template-columns:1fr; } }
-
-/* divider */
 .section-divider { display:flex; align-items:center; gap:10px; margin:4px 0 16px; }
 .section-divider span { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:var(--muted); white-space:nowrap; }
-.section-divider::before, .section-divider::after { content:''; flex:1; height:1px; background:var(--border); }
-
+.section-divider::before,.section-divider::after { content:''; flex:1; height:1px; background:var(--border); }
 #fileInput { display:none; }
 </style>
 </head>
 <body>
 
-<!-- HEADER -->
 <header>
   <div class="logo">
     <div class="logo-icon">💳</div>
@@ -325,21 +251,14 @@ tr:hover td { background:var(--surface); }
       <p>Powered by Claude · No file limits · Fully portable</p>
     </div>
   </div>
-  <div class="api-bar">
-    <label>API Key</label>
-    <div class="api-wrap">
-      <input type="password" id="apiKeyInput" placeholder="sk-ant-..." autocomplete="off">
-      <button class="api-eye" onclick="toggleKeyVisibility()" id="eyeBtn">👁</button>
-    </div>
-    <span class="api-status bad" id="apiBadge">Not Set</span>
+  <div class="header-right">
+    <div class="status-dot"></div>
+    <span class="status-label">AI Ready</span>
   </div>
 </header>
 
 <div class="main">
-
-  <!-- SIDEBAR -->
   <div class="sidebar">
-
     <div class="sidebar-section">
       <h3>📄 Statements</h3>
       <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
@@ -353,9 +272,7 @@ tr:hover td { background:var(--surface); }
 
     <div class="sidebar-section">
       <h3>📁 Uploaded (<span id="fileCount">0</span>)</h3>
-      <div class="file-list" id="fileList">
-        <div class="no-files">No files uploaded yet</div>
-      </div>
+      <div class="file-list" id="fileList"><div class="no-files">No files uploaded yet</div></div>
     </div>
 
     <div class="sidebar-section">
@@ -374,16 +291,12 @@ tr:hover td { background:var(--surface); }
     <button class="analyze-btn" id="analyzeBtn" onclick="runAnalysis()" disabled>
       🔍 Analyze My Statements
     </button>
-
     <button class="chat-btn" id="chatToggleBtn" onclick="toggleChat()" disabled>
       💬 Ask Follow-up Questions
     </button>
-
   </div>
 
-  <!-- CONTENT -->
-  <div class="content" id="contentArea">
-
+  <div class="content">
     <!-- WELCOME -->
     <div id="welcomeScreen">
       <div class="welcome">
@@ -391,21 +304,10 @@ tr:hover td { background:var(--surface); }
         <h2>Your Personal Credit Card AI Agent</h2>
         <p>Upload your bank statements and get a complete financial breakdown — subscriptions to cancel, hidden charges to dispute, and a step-by-step action plan to save money immediately.</p>
         <div class="steps-grid">
-          <div class="step-card">
-            <div class="step-num">1</div>
-            <h4>Add Your API Key</h4>
-            <p>Enter your Anthropic key above. Get one free at console.anthropic.com</p>
-          </div>
-          <div class="step-card">
-            <div class="step-num">2</div>
-            <h4>Upload Statements</h4>
-            <p>Drop as many PDFs or CSVs as you want — no limit on file count or months</p>
-          </div>
-          <div class="step-card">
-            <div class="step-num">3</div>
-            <h4>Get Your Report</h4>
-            <p>Full analysis with subscriptions, hidden charges, and an action plan in 60 seconds</p>
-          </div>
+          <div class="step-card"><div class="step-num">1</div><h4>Upload Statements</h4><p>Drop as many PDFs or CSVs as you want — no limit on files or months</p></div>
+          <div class="step-card"><div class="step-num">2</div><h4>Click Analyze</h4><p>AI reads every transaction and builds your complete report in ~60 seconds</p></div>
+          <div class="step-card"><div class="step-num">3</div><h4>Cancel & Save</h4><p>Get exact steps to cancel predatory subscriptions and dispute hidden charges</p></div>
+          <div class="step-card"><div class="step-num">4</div><h4>Ask Questions</h4><p>Chat with the AI about your spending after the analysis is done</p></div>
         </div>
         <div class="privacy-note">🔒 Your data stays in your browser and is never stored</div>
       </div>
@@ -415,7 +317,7 @@ tr:hover td { background:var(--surface); }
     <div class="loading-screen" id="loadingScreen">
       <div class="spinner"></div>
       <h3 id="loadingTitle">Reading your statements...</h3>
-      <p id="loadingSubtitle">This takes 30–60 seconds depending on how many files you uploaded</p>
+      <p>This takes 30–60 seconds depending on how many files you uploaded</p>
       <div class="prog-list" id="loadingProgress"></div>
     </div>
 
@@ -424,10 +326,10 @@ tr:hover td { background:var(--surface); }
       <div class="chat-panel" id="chatPanel">
         <div class="chat-header">
           <span>💬 Ask me anything about your statements</span>
-          <button onclick="toggleChat()" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:18px">×</button>
+          <button onclick="toggleChat()" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:20px;line-height:1">×</button>
         </div>
         <div class="chat-messages" id="chatMessages">
-          <div class="chat-msg assistant">Hi! I've analyzed your statements. Try asking: "Which subscription is costing me the most?", "How much did I spend on food?", or "What should I cancel first?"</div>
+          <div class="chat-msg assistant">Hi! I've analyzed your statements. Try asking: "Which subscription costs me the most?", "How much did I spend on food?", or "What should I cancel first?"</div>
         </div>
         <div class="chat-input-row">
           <input type="text" id="chatInput" placeholder="Ask about your spending..." onkeydown="if(event.key==='Enter')sendChat()">
@@ -436,149 +338,99 @@ tr:hover td { background:var(--surface); }
       </div>
       <div id="resultsContent"></div>
     </div>
-
   </div>
 </div>
 
 <script>
-// ─── STATE ───
+// ================================================================
+// 🔑 PASTE YOUR ANTHROPIC API KEY BELOW — keep the quotes
+// ================================================================
+const API_KEY = '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';
+// ================================================================
+
 let uploadedFiles = [];
 let analysisData = null;
 let chatHistory = [];
 
-// ─── API KEY ───
-const apiInput = document.getElementById('apiKeyInput');
-const apiBadge = document.getElementById('apiBadge');
-
-// OPTIONAL: Hardcode your key here so you never have to type it
-// const HARDCODED_KEY = 'sk-ant-YOUR-KEY-HERE';
-const HARDCODED_KEY = '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';
-
+// Check key on load
 window.addEventListener('load', () => {
-  if (HARDCODED_KEY) {
-    apiInput.value = HARDCODED_KEY;
-    apiBadge.textContent = '✓ Key Ready';
-    apiBadge.className = 'api-status ok';
+  if (!API_KEY || API_KEY === 'PASTE_YOUR_API_KEY_HERE') {
+    document.getElementById('analyzeBtn').disabled = true;
+    document.querySelector('.status-dot').style.background = '#dc2626';
+    document.querySelector('.status-label').textContent = 'No API Key';
+    document.querySelector('.status-label').style.color = '#dc2626';
+    alert('⚠️ Please open this file in a text editor and add your Anthropic API key where it says PASTE_YOUR_API_KEY_HERE');
   }
-  updateButtons();
 });
 
-apiInput.addEventListener('input', validateKey);
-
-function validateKey() {
-  const val = apiInput.value.trim();
-  const valid = val.startsWith('sk-ant-') && val.length > 20;
-  apiBadge.textContent = valid ? '✓ Key Ready' : 'Not Set';
-  apiBadge.className = 'api-status ' + (valid ? 'ok' : 'bad');
-  updateButtons();
-}
-
-function toggleKeyVisibility() {
-  const input = document.getElementById('apiKeyInput');
-  input.type = input.type === 'password' ? 'text' : 'password';
-}
-
-// ─── FILES ───
+// FILES
 const dropZone = document.getElementById('dropZone');
 const fileInput = document.getElementById('fileInput');
-
 dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag'); });
 dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag'));
 dropZone.addEventListener('drop', e => { e.preventDefault(); dropZone.classList.remove('drag'); handleFiles(e.dataTransfer.files); });
 fileInput.addEventListener('change', e => { handleFiles(e.target.files); fileInput.value = ''; });
 
 function handleFiles(files) {
-  for (const f of files) {
-    if (!uploadedFiles.find(x => x.name === f.name)) uploadedFiles.push(f);
-  }
+  for (const f of files) { if (!uploadedFiles.find(x => x.name === f.name)) uploadedFiles.push(f); }
   renderFileList();
-  updateButtons();
 }
 
-function removeFile(i) {
-  uploadedFiles.splice(i, 1);
-  renderFileList();
-  updateButtons();
-}
+function removeFile(i) { uploadedFiles.splice(i, 1); renderFileList(); }
 
 function renderFileList() {
   const list = document.getElementById('fileList');
   document.getElementById('fileCount').textContent = uploadedFiles.length;
-  if (!uploadedFiles.length) { list.innerHTML = '<div class="no-files">No files uploaded yet</div>'; return; }
-  list.innerHTML = uploadedFiles.map((f, i) => `
-    <div class="file-item">
-      <span class="file-item-name">📄 ${f.name}</span>
-      <span class="file-size">${(f.size/1024).toFixed(0)}KB</span>
-      <button class="file-remove" onclick="removeFile(${i})">×</button>
-    </div>`).join('');
+  if (!uploadedFiles.length) { list.innerHTML = '<div class="no-files">No files uploaded yet</div>'; }
+  else { list.innerHTML = uploadedFiles.map((f,i) => `<div class="file-item"><span class="file-name">📄 ${f.name}</span><span class="file-size">${(f.size/1024).toFixed(0)}KB</span><button class="file-rm" onclick="removeFile(${i})">×</button></div>`).join(''); }
+  const hasKey = API_KEY && API_KEY !== 'PASTE_YOUR_API_KEY_HERE';
+  document.getElementById('analyzeBtn').disabled = !(hasKey && uploadedFiles.length > 0);
 }
 
-function updateButtons() {
-  const hasKey = apiInput.value.trim().startsWith('sk-ant-') && apiInput.value.trim().length > 20;
-  const hasFiles = uploadedFiles.length > 0;
-  document.getElementById('analyzeBtn').disabled = !(hasKey && hasFiles);
-  document.getElementById('chatToggleBtn').disabled = !analysisData;
+async function readB64(file) {
+  return new Promise((res,rej) => { const r=new FileReader(); r.onload=e=>res(e.target.result.split(',')[1]); r.onerror=rej; r.readAsDataURL(file); });
+}
+async function readText(file) {
+  return new Promise((res,rej) => { const r=new FileReader(); r.onload=e=>res(e.target.result); r.onerror=rej; r.readAsText(file); });
 }
 
-// ─── FILE READERS ───
-async function readFileAsBase64(file) {
-  return new Promise((res, rej) => {
-    const r = new FileReader();
-    r.onload = e => res(e.target.result.split(',')[1]);
-    r.onerror = rej;
-    r.readAsDataURL(file);
-  });
-}
-async function readFileAsText(file) {
-  return new Promise((res, rej) => {
-    const r = new FileReader();
-    r.onload = e => res(e.target.result);
-    r.onerror = rej;
-    r.readAsText(file);
-  });
-}
-
-// ─── LOADING ───
-const loadMsgs = [
-  { text: 'Reading your PDF statements...', t: 0 },
-  { text: 'Extracting all transactions...', t: 4000 },
-  { text: 'Identifying recurring charges...', t: 9000 },
-  { text: 'Hunting for hidden subscriptions...', t: 15000 },
-  { text: 'Categorizing your spending...', t: 21000 },
-  { text: 'Flagging suspicious charges...', t: 27000 },
-  { text: 'Building your action plan...', t: 34000 },
-  { text: 'Compiling your full report...', t: 42000 },
+// LOADING
+const LOAD_MSGS = [
+  {text:'Reading your PDF statements...',t:0},
+  {text:'Extracting all transactions...',t:4000},
+  {text:'Identifying recurring charges...',t:9000},
+  {text:'Hunting for hidden subscriptions...',t:15000},
+  {text:'Categorizing your spending...',t:21000},
+  {text:'Flagging suspicious charges...',t:27000},
+  {text:'Building your action plan...',t:34000},
+  {text:'Compiling your full report...',t:42000},
 ];
 let loadTimers = [];
 
 function startLoading() {
   const prog = document.getElementById('loadingProgress');
-  prog.innerHTML = loadMsgs.map((m,i) => `<div class="prog-item" id="prog-${i}">⏳ ${m.text}</div>`).join('');
-  loadTimers.forEach(clearTimeout);
-  loadTimers = [];
-  loadMsgs.forEach((m, i) => {
+  prog.innerHTML = LOAD_MSGS.map((m,i) => `<div class="prog-item" id="prog-${i}">⏳ ${m.text}</div>`).join('');
+  loadTimers.forEach(clearTimeout); loadTimers = [];
+  LOAD_MSGS.forEach((m,i) => {
     loadTimers.push(setTimeout(() => {
-      if (i > 0) { const prev = document.getElementById(`prog-${i-1}`); if(prev) { prev.className='prog-item done'; prev.textContent='✓ '+loadMsgs[i-1].text; } }
-      const el = document.getElementById(`prog-${i}`);
-      if (el) { el.className='prog-item active'; el.textContent='🔵 '+m.text; }
-      document.getElementById('loadingTitle').textContent = m.text;
+      if (i>0) { const p=document.getElementById(`prog-${i-1}`); if(p){p.className='prog-item done';p.textContent='✓ '+LOAD_MSGS[i-1].text;} }
+      const el=document.getElementById(`prog-${i}`);
+      if(el){el.className='prog-item active';el.textContent='● '+m.text;}
+      document.getElementById('loadingTitle').textContent=m.text;
     }, m.t));
   });
 }
 
 function showScreen(id) {
-  document.getElementById('welcomeScreen').style.display = id === 'welcomeScreen' ? 'block' : 'none';
-  document.getElementById('loadingScreen').style.display = id === 'loadingScreen' ? 'block' : 'none';
-  document.getElementById('resultsArea').style.display = id === 'resultsArea' ? 'block' : 'none';
+  document.getElementById('welcomeScreen').style.display = id==='welcomeScreen'?'block':'none';
+  document.getElementById('loadingScreen').style.display = id==='loadingScreen'?'block':'none';
+  document.getElementById('resultsArea').style.display = id==='resultsArea'?'block':'none';
 }
 
-// ─── ANALYSIS ───
+// ANALYSIS
 async function runAnalysis() {
-  const apiKey = apiInput.value.trim();
-  if (!apiKey || !uploadedFiles.length) return;
-
-  showScreen('loadingScreen');
-  startLoading();
+  if (!uploadedFiles.length) return;
+  showScreen('loadingScreen'); startLoading();
 
   const opts = {
     subs: document.getElementById('opt-subs').checked,
@@ -591,205 +443,110 @@ async function runAnalysis() {
   };
 
   try {
-    const userContent = [];
+    const content = [];
     for (const file of uploadedFiles) {
       const ext = file.name.toLowerCase().split('.').pop();
       if (ext === 'pdf') {
-        const b64 = await readFileAsBase64(file);
-        userContent.push({ type:'document', source:{ type:'base64', media_type:'application/pdf', data:b64 } });
-        userContent.push({ type:'text', text:`[File: ${file.name}]` });
+        content.push({ type:'document', source:{ type:'base64', media_type:'application/pdf', data: await readB64(file) } });
+        content.push({ type:'text', text:`[File: ${file.name}]` });
       } else {
-        const text = await readFileAsText(file);
-        userContent.push({ type:'text', text:`\n--- FILE: ${file.name} ---\n${text.substring(0,15000)}\n---\n` });
+        content.push({ type:'text', text:`\n--- FILE: ${file.name} ---\n${(await readText(file)).substring(0,15000)}\n---\n` });
       }
     }
 
-    userContent.push({ type:'text', text:`
-You are a personal financial AI agent. Analyze ALL the credit card statements provided.
-
-Return ONLY valid JSON — no markdown, no backticks, no extra text. Use this exact structure:
-
+    content.push({ type:'text', text:`
+You are a personal financial AI agent. Analyze ALL credit card statements provided.
+Return ONLY valid JSON — no markdown, no backticks, no extra text. Structure:
 {
-  "summary": {
-    "cardHolder": "string",
-    "bank": "string",
-    "totalSpend": 0,
-    "months": 0,
-    "avgMonthly": 0,
-    "totalTransactions": 0,
-    "currentBalance": 0,
-    "potentialSavings": 0
-  },
-  "monthlyTrend": [{ "period": "string", "amount": 0 }],
-  "categories": [{ "name": "string", "amount": 0, "count": 0, "color": "#hex", "pct": 0 }],
-  "subscriptions": [{
-    "name": "string",
-    "amount": 0,
-    "frequency": "Monthly|Annual|Weekly",
-    "annualCost": 0,
-    "risk": "high|medium|low",
-    "reason": "string",
-    "recommendation": "Cancel|Keep|Review",
-    "cancelUrl": "website or phone number",
-    "cancelSteps": ["step 1", "step 2", "step 3"]
-  }],
-  "hiddenCharges": [{
-    "description": "string",
-    "amount": 0,
-    "occurrences": 0,
-    "totalCost": 0,
-    "action": "string",
-    "disputeSteps": ["step 1", "step 2"]
-  }],
-  "insights": [{ "icon": "emoji", "title": "string", "description": "string" }],
-  "topMerchants": [{ "name": "string", "total": 0, "count": 0, "category": "string" }],
-  "recentTransactions": [{ "date": "YYYY-MM-DD", "merchant": "string", "amount": 0, "category": "string" }],
-  "actionPlan": [{
-    "priority": "high|medium|low",
-    "title": "string",
-    "description": "string",
-    "saving": "$X/year or $X",
-    "steps": ["Exact step 1 with URL/phone", "Step 2", "Step 3"]
-  }]
+  "summary":{ "cardHolder":"string","bank":"string","totalSpend":0,"months":0,"avgMonthly":0,"totalTransactions":0,"currentBalance":0,"potentialSavings":0 },
+  "monthlyTrend":[{ "period":"string","amount":0 }],
+  "categories":[{ "name":"string","amount":0,"count":0,"color":"#hex","pct":0 }],
+  "subscriptions":[{ "name":"string","amount":0,"frequency":"Monthly|Annual","annualCost":0,"risk":"high|medium|low","reason":"string","recommendation":"Cancel|Keep|Review","cancelUrl":"string","cancelSteps":["step 1","step 2","step 3"] }],
+  "hiddenCharges":[{ "description":"string","amount":0,"occurrences":0,"totalCost":0,"action":"string","disputeSteps":["step 1","step 2"] }],
+  "insights":[{ "icon":"emoji","title":"string","description":"string" }],
+  "topMerchants":[{ "name":"string","total":0,"count":0,"category":"string" }],
+  "recentTransactions":[{ "date":"YYYY-MM-DD","merchant":"string","amount":0,"category":"string" }],
+  "actionPlan":[{ "priority":"high|medium|low","title":"string","description":"string","saving":"string","steps":["exact step with URL/phone","step 2","step 3"] }]
 }
-
 Requirements:
-${opts.subs ? '- Find ALL recurring charges. Flag predatory ones (deceptive value, hard to cancel, scam-adjacent). Include exact cancellation steps and URL/phone for each.' : ''}
-${opts.hidden ? '- Identify hidden charges: scam impersonators, duplicate charges, mystery merchants, foreign fees. Include dispute steps.' : ''}
-${opts.cats ? '- Categorize into: Food & Dining, Transportation, Groceries, Shopping, Education, Entertainment, Subscriptions, Utilities, Healthcare, Travel, Other.' : ''}
-${opts.merchants ? '- Top 12 merchants by total spend.' : ''}
-${opts.insights ? '- 5-7 specific, actionable insights with actual numbers from the data.' : ''}
-${opts.trends ? '- Monthly trend data for every statement period.' : ''}
-${opts.action ? '- 6-8 action plan items ordered by priority. Each must have a title, description, estimated saving, and 2-4 specific numbered steps the user can take right now. Include phone numbers, URLs, and app navigation paths where relevant.' : ''}
-- potentialSavings = sum of annualCost for all Cancel subscriptions.
-- Include up to 30 recent transactions.
-- Be thorough. Flag SmartyPlus-type predatory subs. Flag fake USPS charges. Flag duplicate Adobe charges. Flag unexplained international charges.
-` });
+${opts.subs?'- Find ALL recurring charges. Flag predatory ones. Include exact cancelUrl and cancelSteps for each.':''}
+${opts.hidden?'- Find hidden charges: scam sites, duplicate charges, mystery merchants. Include disputeSteps.':''}
+${opts.cats?'- Categories: Food & Dining, Transportation, Groceries, Shopping, Education, Entertainment, Subscriptions, Utilities, Healthcare, Travel, Other.':''}
+${opts.merchants?'- Top 12 merchants by spend.':''}
+${opts.insights?'- 5-7 specific insights with real numbers from the data.':''}
+${opts.trends?'- Monthly trend for every statement period.':''}
+${opts.action?'- 6-8 action plan items by priority. Each must have title, description, saving estimate, and 2-4 exact steps with URLs/phone numbers/app paths.':''}
+- potentialSavings = sum of annualCost for Cancel subscriptions.
+- Flag SmartyPlus, fake USPS, duplicate Adobe, unexplained international charges.
+- Include up to 30 recent transactions.` });
 
     const resp = await fetch('https://api.anthropic.com/v1/messages', {
       method:'POST',
-      headers:{
-        'Content-Type':'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version':'2023-06-01',
-        'anthropic-dangerous-direct-browser-access':'true'
-      },
-      body: JSON.stringify({ model:'claude-sonnet-4-6', max_tokens:7000, messages:[{ role:'user', content:userContent }] })
+      headers:{ 'Content-Type':'application/json','x-api-key':API_KEY,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true' },
+      body: JSON.stringify({ model:'claude-sonnet-4-6', max_tokens:7000, messages:[{ role:'user', content }] })
     });
 
-    if (!resp.ok) {
-      const err = await resp.json();
-      throw new Error(err.error?.message || `API error ${resp.status}`);
-    }
+    if (!resp.ok) { const e=await resp.json(); throw new Error(e.error?.message||`API error ${resp.status}`); }
 
     const data = await resp.json();
-    const raw = data.content.map(c => c.text||'').join('');
-
+    const raw = data.content.map(c=>c.text||'').join('');
     let parsed;
-    try { parsed = JSON.parse(raw.replace(/```json|```/g,'').trim()); }
-    catch { const m = raw.match(/\{[\s\S]*\}/); if(m) parsed=JSON.parse(m[0]); else throw new Error('Could not parse response. Try again.'); }
+    try { parsed=JSON.parse(raw.replace(/```json|```/g,'').trim()); }
+    catch { const m=raw.match(/\{[\s\S]*\}/); if(m) parsed=JSON.parse(m[0]); else throw new Error('Could not parse AI response. Please try again.'); }
 
     analysisData = parsed;
-
     chatHistory = [
-      { role:'user', content:`I analyzed my credit card statements. Summary: ${JSON.stringify(parsed.summary)}. Subscriptions: ${JSON.stringify(parsed.subscriptions)}. Hidden charges: ${JSON.stringify(parsed.hiddenCharges)}. Top merchants: ${JSON.stringify(parsed.topMerchants)}. Action plan: ${JSON.stringify(parsed.actionPlan)}.` },
-      { role:'assistant', content:`Analyzed your statements. Found ${parsed.subscriptions?.length||0} subscriptions and potential savings of $${parsed.summary?.potentialSavings||0}/year. Ready for follow-up questions.` }
+      { role:'user', content:`I analyzed my credit card statements. Summary: ${JSON.stringify(parsed.summary)}. Subscriptions: ${JSON.stringify(parsed.subscriptions)}. Hidden: ${JSON.stringify(parsed.hiddenCharges)}. Merchants: ${JSON.stringify(parsed.topMerchants)}. Action plan: ${JSON.stringify(parsed.actionPlan)}.` },
+      { role:'assistant', content:`Analysis complete. Found ${parsed.subscriptions?.length||0} subscriptions and $${parsed.summary?.potentialSavings||0} in potential annual savings. Ask me anything!` }
     ];
 
     loadTimers.forEach(clearTimeout);
     showScreen('resultsArea');
+    document.getElementById('resultsArea').style.display = 'block';
     renderResults(parsed);
     document.getElementById('chatToggleBtn').disabled = false;
 
   } catch(err) {
     loadTimers.forEach(clearTimeout);
     showScreen('resultsArea');
-    document.getElementById('resultsContent').innerHTML = `
-      <div class="error-box">
-        <strong>⚠️ Analysis Error</strong><br><br>${err.message}<br><br>
-        <span style="font-size:12px">• Check your API key starts with sk-ant-<br>• Make sure PDF files have selectable text (not scanned images)<br>• Try again if the request timed out</span>
-      </div>`;
+    document.getElementById('resultsArea').style.display = 'block';
+    document.getElementById('resultsContent').innerHTML = `<div class="error-box"><strong>⚠️ Error</strong><br><br>${err.message}<br><br><span style="font-size:12px">• Make sure your PDF files have selectable text (not scanned images)<br>• Check your internet connection and try again</span></div>`;
   }
 }
 
-// ─── RENDER ───
-function fmt(n) { return '$'+(n||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}); }
-
-const GRADIENTS = [
-  'linear-gradient(90deg,#ef4444,#f97316)',
-  'linear-gradient(90deg,#2563eb,#6366f1)',
-  'linear-gradient(90deg,#059669,#0ea5e9)',
-  'linear-gradient(90deg,#d97706,#ef4444)',
-  'linear-gradient(90deg,#7c3aed,#ec4899)',
-  'linear-gradient(90deg,#059669,#2563eb)',
-  'linear-gradient(90deg,#ea580c,#d97706)',
-];
+// RENDER
+function fmt(n){ return '$'+(n||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+const GRADS=['linear-gradient(90deg,#ef4444,#f97316)','linear-gradient(90deg,#2563eb,#6366f1)','linear-gradient(90deg,#059669,#0ea5e9)','linear-gradient(90deg,#d97706,#ef4444)','linear-gradient(90deg,#7c3aed,#ec4899)','linear-gradient(90deg,#059669,#2563eb)','linear-gradient(90deg,#ea580c,#d97706)'];
 
 function renderResults(d) {
-  const s = d.summary || {};
-  const subs = d.subscriptions || [];
-  const hidden = d.hiddenCharges || [];
-  const cats = d.categories || [];
-  const insights = d.insights || [];
-  const merchants = d.topMerchants || [];
-  const trend = d.monthlyTrend || [];
-  const txns = d.recentTransactions || [];
-  const plan = d.actionPlan || [];
-
-  const dangerSubs = subs.filter(x => x.risk==='high');
-  const cancelSubs = subs.filter(x => x.recommendation==='Cancel');
-  const maxCat = Math.max(...cats.map(c=>c.amount),1);
-  const maxTrend = Math.max(...trend.map(t=>t.amount),1);
+  const s=d.summary||{}, subs=d.subscriptions||[], hidden=d.hiddenCharges||[], cats=d.categories||[];
+  const insights=d.insights||[], merchants=d.topMerchants||[], trend=d.monthlyTrend||[];
+  const txns=d.recentTransactions||[], plan=d.actionPlan||[];
+  const dangerSubs=subs.filter(x=>x.risk==='high');
+  const maxCat=Math.max(...cats.map(c=>c.amount),1);
+  const maxTrend=Math.max(...trend.map(t=>t.amount),1);
 
   document.getElementById('resultsContent').innerHTML = `
-
-    <!-- STATS -->
     <div class="stat-row">
-      <div class="stat-card">
-        <div class="s-label">Total Spent</div>
-        <div class="s-val" style="color:var(--red)">${fmt(s.totalSpend)}</div>
-        <div class="s-sub">${s.months||''} months · ${s.totalTransactions||''} transactions</div>
-      </div>
-      <div class="stat-card">
-        <div class="s-label">Avg / Month</div>
-        <div class="s-val" style="color:var(--orange)">${fmt(s.avgMonthly)}</div>
-      </div>
-      <div class="stat-card">
-        <div class="s-label">Subscriptions Found</div>
-        <div class="s-val" style="color:var(--purple)">${subs.length}</div>
-        <div class="s-sub">${dangerSubs.length} to cancel immediately</div>
-      </div>
-      <div class="stat-card">
-        <div class="s-label">Hidden Charges</div>
-        <div class="s-val" style="color:var(--red)">${hidden.length}</div>
-        <div class="s-sub">Review &amp; dispute</div>
-      </div>
-      <div class="stat-card">
-        <div class="s-label">Potential Savings</div>
-        <div class="s-val" style="color:var(--green)">${fmt(s.potentialSavings)}</div>
-        <div class="s-sub">per year</div>
-      </div>
-      <div class="stat-card">
-        <div class="s-label">Current Balance</div>
-        <div class="s-val" style="color:var(--yellow)">${fmt(s.currentBalance)}</div>
-      </div>
+      <div class="stat-card"><div class="s-label">Total Spent</div><div class="s-val" style="color:var(--red)">${fmt(s.totalSpend)}</div><div class="s-sub">${s.months||''} months · ${s.totalTransactions||''} txns</div></div>
+      <div class="stat-card"><div class="s-label">Avg / Month</div><div class="s-val" style="color:var(--orange)">${fmt(s.avgMonthly)}</div></div>
+      <div class="stat-card"><div class="s-label">Subscriptions</div><div class="s-val" style="color:var(--purple)">${subs.length}</div><div class="s-sub">${dangerSubs.length} to cancel</div></div>
+      <div class="stat-card"><div class="s-label">Hidden Charges</div><div class="s-val" style="color:var(--red)">${hidden.length}</div></div>
+      <div class="stat-card"><div class="s-label">Potential Savings</div><div class="s-val" style="color:var(--green)">${fmt(s.potentialSavings)}</div><div class="s-sub">per year</div></div>
+      <div class="stat-card"><div class="s-label">Balance</div><div class="s-val" style="color:var(--yellow)">${fmt(s.currentBalance)}</div></div>
     </div>
 
-    ${dangerSubs.length ? `
-    <!-- DANGER SUBS -->
+    ${dangerSubs.length?`
     <div class="section-divider"><span>🚨 Cancel Immediately</span></div>
     <div class="card alert-red">
       <div class="card-title">Predatory & Wasteful Subscriptions <span class="ct-count">${dangerSubs.length} found</span></div>
-      ${dangerSubs.map(sub => `
+      ${dangerSubs.map(sub=>`
         <div class="sub-row risk-high">
           <div style="flex:1">
             <div class="sub-name">${sub.name}</div>
             <div class="sub-reason">${sub.reason}</div>
-            ${sub.cancelUrl ? `<div class="sub-cancel-url">📞 Cancel: ${sub.cancelUrl}</div>` : ''}
-            ${sub.cancelSteps && sub.cancelSteps.length ? `
-              <div style="margin-top:6px;display:flex;flex-direction:column;gap:3px;">
-                ${sub.cancelSteps.map((step,i) => `<div style="font-size:11px;color:var(--text2);display:flex;gap:6px;align-items:flex-start;"><span style="color:var(--primary);font-weight:700;flex-shrink:0">${i+1}.</span>${step}</div>`).join('')}
-              </div>` : ''}
+            ${sub.cancelUrl?`<div class="sub-cancel-url">📞 ${sub.cancelUrl}</div>`:''}
+            ${sub.cancelSteps?.length?`<div style="margin-top:6px;display:flex;flex-direction:column;gap:3px">${sub.cancelSteps.map((s,i)=>`<div style="font-size:11px;color:var(--text2);display:flex;gap:5px"><span style="color:var(--primary);font-weight:700;flex-shrink:0">${i+1}.</span>${s}</div>`).join('')}</div>`:''}
           </div>
           <div class="sub-right">
             <div class="sub-amt" style="color:var(--red)">${fmt(sub.amount)}/mo</div>
@@ -801,195 +558,146 @@ function renderResults(d) {
         <div class="big-num">${fmt(dangerSubs.reduce((a,s)=>a+(s.annualCost||s.amount*12),0))}</div>
         <p>saved every year by cancelling these ${dangerSubs.length} subscription${dangerSubs.length>1?'s':''}</p>
       </div>
-    </div>` : ''}
+    </div>`:''}
 
-    ${plan.length ? `
-    <!-- ACTION PLAN -->
+    ${plan.length?`
     <div class="section-divider"><span>✅ Your Action Plan</span></div>
     <div class="card">
       <div class="card-title">Step-by-Step — What to Do Right Now <span class="ct-count">${plan.length} actions</span></div>
       <div class="action-grid">
-        ${plan.map((p,i) => `
+        ${plan.map((p,i)=>`
           <div class="action-item">
             <div class="action-num p-${p.priority}">${i+1}</div>
             <div>
               <div class="action-title">${p.title}</div>
               <div class="action-desc">${p.description}</div>
-              ${p.steps && p.steps.length ? `
-                <div class="action-steps">
-                  ${p.steps.map(step => `<div class="action-step">${step}</div>`).join('')}
-                </div>` : ''}
+              ${p.steps?.length?`<div class="action-steps">${p.steps.map(s=>`<div class="action-step">${s}</div>`).join('')}</div>`:''}
             </div>
             <div class="action-saving">${p.saving||''}</div>
           </div>`).join('')}
       </div>
-    </div>` : ''}
+    </div>`:''}
 
-    ${trend.length ? `
-    <!-- MONTHLY TREND -->
+    ${trend.length?`
     <div class="section-divider"><span>📈 Monthly Trend</span></div>
     <div class="card">
       <div class="card-title">Spending Over Time</div>
-      ${trend.map((t,i) => `
+      ${trend.map((t,i)=>`
         <div class="month-row">
           <div class="month-lbl">${t.period}</div>
-          <div class="m-bar-bg"><div class="m-bar" style="width:${Math.round(t.amount/maxTrend*100)}%;background:${GRADIENTS[i%GRADIENTS.length]}">${fmt(t.amount)}</div></div>
+          <div class="m-bar-bg"><div class="m-bar" style="width:${Math.round(t.amount/maxTrend*100)}%;background:${GRADS[i%GRADS.length]}">${fmt(t.amount)}</div></div>
           <div class="m-amt">${fmt(t.amount)}</div>
         </div>`).join('')}
-    </div>` : ''}
+    </div>`:''}
 
     <div class="grid-2">
-      ${subs.length ? `
-      <!-- ALL SUBS -->
+      ${subs.length?`
       <div class="card">
         <div class="card-title">🔄 All Subscriptions <span class="ct-count">${subs.length}</span></div>
-        ${subs.map(sub => `
+        ${subs.map(sub=>`
           <div class="sub-row risk-${sub.risk}">
             <div style="flex:1">
               <div class="sub-name">${sub.name}</div>
               <div class="sub-reason">${sub.frequency} · ${sub.reason}</div>
-              ${sub.cancelUrl && sub.recommendation==='Cancel' ? `<div class="sub-cancel-url">${sub.cancelUrl}</div>` : ''}
+              ${sub.cancelUrl&&sub.recommendation==='Cancel'?`<div class="sub-cancel-url">${sub.cancelUrl}</div>`:''}
             </div>
             <div class="sub-right">
               <div class="sub-amt">${fmt(sub.amount)}/mo</div>
               <span class="pill ${sub.recommendation==='Cancel'?'pill-red':sub.recommendation==='Keep'?'pill-green':'pill-yellow'}">${sub.recommendation}</span>
             </div>
           </div>`).join('')}
-      </div>` : ''}
+      </div>`:''}
 
-      ${cats.length ? `
-      <!-- CATEGORIES -->
+      ${cats.length?`
       <div class="card">
         <div class="card-title">📊 Spending by Category</div>
-        ${cats.sort((a,b)=>b.amount-a.amount).map(cat => `
+        ${cats.sort((a,b)=>b.amount-a.amount).map(cat=>`
           <div class="cat-item">
             <div class="cat-head">
-              <span>${cat.name} <span style="color:var(--muted);font-size:10px">${cat.count||''} transactions</span></span>
-              <span>${fmt(cat.amount)} <span style="color:var(--muted);font-size:10px">${cat.pct||''}%</span></span>
+              <span style="color:var(--text2)">${cat.name} <span style="color:var(--muted);font-size:10px">${cat.count||''} txns</span></span>
+              <span style="font-weight:700">${fmt(cat.amount)} <span style="color:var(--muted);font-size:10px">${cat.pct||''}%</span></span>
             </div>
             <div class="bar-bg"><div class="bar-fill" style="width:${Math.round(cat.amount/maxCat*100)}%;background:${cat.color||'#2563eb'}"></div></div>
           </div>`).join('')}
-      </div>` : ''}
+      </div>`:''}
     </div>
 
-    ${hidden.length ? `
-    <!-- HIDDEN CHARGES -->
+    ${hidden.length?`
     <div class="section-divider"><span>🕵️ Hidden & Suspicious Charges</span></div>
     <div class="card alert-yellow">
-      <div class="card-title">Charges to Dispute or Investigate <span class="ct-count">${hidden.length} found</span></div>
-      ${hidden.map(h => `
+      <div class="card-title">Charges to Dispute or Investigate <span class="ct-count">${hidden.length}</span></div>
+      ${hidden.map(h=>`
         <div class="hc-row">
           <div style="flex:1">
             <div class="hc-name">${h.description}</div>
             <div class="hc-detail">${h.occurrences} occurrence${h.occurrences>1?'s':''} · ${fmt(h.amount)} each</div>
             <div class="hc-action">${h.action||''}</div>
-            ${h.disputeSteps && h.disputeSteps.length ? `
-              <div style="margin-top:5px;display:flex;flex-direction:column;gap:2px;">
-                ${h.disputeSteps.map((s,i)=>`<div style="font-size:11px;color:var(--text2);display:flex;gap:5px;"><span style="color:var(--primary);font-weight:700">${i+1}.</span>${s}</div>`).join('')}
-              </div>` : ''}
+            ${h.disputeSteps?.length?`<div style="margin-top:5px;display:flex;flex-direction:column;gap:2px">${h.disputeSteps.map((s,i)=>`<div style="font-size:11px;color:var(--text2);display:flex;gap:5px"><span style="color:var(--primary);font-weight:700">${i+1}.</span>${s}</div>`).join('')}</div>`:''}
           </div>
           <div class="hc-amount">${fmt(h.totalCost)}</div>
         </div>`).join('')}
-    </div>` : ''}
+    </div>`:''}
 
-    ${insights.length ? `
-    <!-- INSIGHTS -->
-    <div class="section-divider"><span>💡 AI Insights</span></div>
+    ${insights.length?`
+    <div class="section-divider"><span>💡 Insights</span></div>
     <div class="card">
       <div class="card-title">Personalized Observations</div>
       <div class="grid-2">
-        ${insights.map(i => `
-          <div class="insight-row">
-            <div class="ins-icon">${i.icon}</div>
-            <div>
-              <div class="ins-title">${i.title}</div>
-              <div class="ins-desc">${i.description}</div>
-            </div>
-          </div>`).join('')}
+        ${insights.map(i=>`<div class="insight-row"><div class="ins-icon">${i.icon}</div><div><div class="ins-title">${i.title}</div><div class="ins-desc">${i.description}</div></div></div>`).join('')}
       </div>
-    </div>` : ''}
+    </div>`:''}
 
-    ${merchants.length ? `
-    <!-- MERCHANTS -->
+    ${merchants.length?`
     <div class="section-divider"><span>🏪 Top Merchants</span></div>
     <div class="card">
       <div class="card-title">Where Your Money Goes</div>
       <table>
-        <thead><tr><th>Merchant</th><th>Category</th><th>Visits</th><th>Total Spent</th></tr></thead>
-        <tbody>
-          ${merchants.slice(0,12).map(m=>`
-            <tr>
-              <td style="font-weight:600">${m.name}</td>
-              <td><span class="cat-tag">${m.category||''}</span></td>
-              <td style="color:var(--muted)">${m.count}</td>
-              <td style="font-weight:700">${fmt(m.total)}</td>
-            </tr>`).join('')}
-        </tbody>
+        <thead><tr><th>Merchant</th><th>Category</th><th>Visits</th><th>Total</th></tr></thead>
+        <tbody>${merchants.slice(0,12).map(m=>`<tr><td style="font-weight:600">${m.name}</td><td><span class="cat-tag">${m.category||''}</span></td><td style="color:var(--muted)">${m.count}</td><td style="font-weight:700">${fmt(m.total)}</td></tr>`).join('')}</tbody>
       </table>
-    </div>` : ''}
+    </div>`:''}
 
-    ${txns.length ? `
-    <!-- TRANSACTIONS -->
+    ${txns.length?`
     <div class="section-divider"><span>📋 Recent Transactions</span></div>
     <div class="card">
       <div class="card-title">Latest Activity</div>
       <table>
         <thead><tr><th>Date</th><th>Merchant</th><th>Category</th><th>Amount</th></tr></thead>
-        <tbody>
-          ${txns.slice(0,30).map(t=>`
-            <tr>
-              <td style="color:var(--muted)">${t.date||''}</td>
-              <td style="font-weight:500">${t.merchant}</td>
-              <td><span class="cat-tag">${t.category||''}</span></td>
-              <td style="font-weight:700">${fmt(t.amount)}</td>
-            </tr>`).join('')}
-        </tbody>
+        <tbody>${txns.slice(0,30).map(t=>`<tr><td style="color:var(--muted)">${t.date||''}</td><td style="font-weight:500">${t.merchant}</td><td><span class="cat-tag">${t.category||''}</span></td><td style="font-weight:700">${fmt(t.amount)}</td></tr>`).join('')}</tbody>
       </table>
-    </div>` : ''}
+    </div>`:''}
 
     <div style="text-align:center;padding:16px 0;color:var(--muted);font-size:11px">
-      ${uploadedFiles.length} statement${uploadedFiles.length>1?'s':''} analyzed · Powered by Claude AI · ${s.cardHolder||''} · Data stays in your browser
-    </div>
-  `;
+      ${uploadedFiles.length} statement${uploadedFiles.length>1?'s':''} analyzed · Powered by Claude AI · Data stays in your browser
+    </div>`;
 }
 
-// ─── CHAT ───
+// CHAT
 function toggleChat() {
-  const panel = document.getElementById('chatPanel');
-  panel.classList.toggle('open');
-  if (panel.classList.contains('open')) document.getElementById('chatInput').focus();
+  const p = document.getElementById('chatPanel');
+  p.classList.toggle('open');
+  if (p.classList.contains('open')) document.getElementById('chatInput').focus();
 }
 
 async function sendChat() {
   const input = document.getElementById('chatInput');
-  const msg = input.value.trim();
-  if (!msg) return;
+  const msg = input.value.trim(); if (!msg) return;
   input.value = '';
-
   const msgs = document.getElementById('chatMessages');
   msgs.innerHTML += `<div class="chat-msg user">${msg}</div>`;
   msgs.innerHTML += `<div class="chat-msg loading" id="chatLoad">Thinking...</div>`;
   msgs.scrollTop = msgs.scrollHeight;
-
   chatHistory.push({ role:'user', content:msg });
-
   try {
-    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+    const resp = await fetch('https://api.anthropic.com/v1/messages',{
       method:'POST',
-      headers:{
-        'Content-Type':'application/json',
-        'x-api-key': apiInput.value.trim(),
-        'anthropic-version':'2023-06-01',
-        'anthropic-dangerous-direct-browser-access':'true'
-      },
-      body: JSON.stringify({
-        model:'claude-sonnet-4-6', max_tokens:1000,
-        system:`You are a personal financial assistant. The user analyzed their credit card statements. Full analysis: ${JSON.stringify(analysisData)}. Answer concisely with specific numbers. Suggest actionable next steps.`,
-        messages: chatHistory
-      })
+      headers:{'Content-Type':'application/json','x-api-key':API_KEY,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({ model:'claude-sonnet-4-6', max_tokens:1000,
+        system:`You are a personal financial assistant. Analysis data: ${JSON.stringify(analysisData)}. Answer concisely with specific numbers. Suggest actionable next steps.`,
+        messages:chatHistory })
     });
     const data = await resp.json();
-    const reply = data.content[0]?.text || 'Could not generate a response.';
+    const reply = data.content[0]?.text||'Could not generate a response.';
     chatHistory.push({ role:'assistant', content:reply });
     document.getElementById('chatLoad').remove();
     msgs.innerHTML += `<div class="chat-msg assistant">${reply.replace(/\n/g,'<br>')}</div>`;
