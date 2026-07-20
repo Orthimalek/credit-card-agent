@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>💳 Credit Card AI Agent</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --bg: #0b0f1c; --surface: #111827; --surface2: #0f172a;
+    --border: #1e293b; --text: #e2e8f0; --muted: #64748b;
+    --blue: #60a5fa; --purple: #a78bfa; --green: #34d399;
+    --red: #f87171; --yellow: #fbbf24; --orange: #fb923c;
+  }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  /* HEADER */
+  header { background: linear-gradient(135deg,#1a1f35,#0f172a); border-bottom: 1px solid var(--border); padding: 20px 32px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
+  header h1 { font-size: 22px; font-weight: 800; background: linear-gradient(90deg,#60a5fa,#a78bfa,#34d399); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+  header p { color: var(--muted); font-size: 12px; margin-top: 2px; }
+  .api-bar { display: flex; align-items: center; gap: 10px; }
+  .api-bar input { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 8px 14px; color: var(--text); font-size: 13px; width: 280px; }
+  .api-bar input:focus { outline: none; border-color: var(--blue); }
+  .api-badge { font-size: 11px; padding: 3px 10px; border-radius: 20px; font-weight: 600; }
+  .api-badge.ok { background: #052e16; color: #4ade80; }
+  .api-badge.bad { background: #450a0a; color: var(--red); }
+
+  /* MAIN LAYOUT */
+  .main { display: grid; grid-template-columns: 320px 1fr; min-height: calc(100vh - 70px); }
+  @media(max-width:768px) { .main { grid-template-columns: 1fr; } }
+
+  /* SIDEBAR */
+  .sidebar { background: var(--surface); border-right: 1px solid var(--border); padding: 24px; display: flex; flex-direction: column; gap: 20px; }
+  .sidebar h3 { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 4px; }
+
+  .drop-zone { border: 2px dashed var(--border); border-radius: 12px; padding: 28px 16px; text-align: center; cursor: pointer; transition: all 0.25s; }
+  .drop-zone:hover, .drop-zone.drag { border-color: var(--blue); background: #0d1a2e; }
+  .drop-zone .dz-icon { font-size: 36px; margin-bottom: 10px; }
+  .drop-zone p { font-size: 13px; color: var(--muted); line-height: 1.5; }
+  .drop-zone strong { color: var(--blue); }
+
+  .file-list { display: flex; flex-direction: column; gap: 6px; }
+  .file-item { background: var(--surface2); border-radius: 8px; padding: 8px 12px; font-size: 12px; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+  .file-item span { color: #93c5fd; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .file-item button { background: none; border: none; color: var(--red); cursor: pointer; font-size: 16px; flex-shrink: 0; line-height: 1; }
+  .file-size { color: var(--muted); font-size: 11px; flex-shrink: 0; }
+
+  /* ANALYSIS OPTIONS */
+  .option-grid { display: grid; gap: 8px; }
+  .option-item { display: flex; align-items: center; gap: 10px; background: var(--surface2); border-radius: 8px; padding: 10px 12px; cursor: pointer; border: 1px solid transparent; transition: border-color 0.2s; }
+  .option-item:hover { border-color: var(--border); }
+  .option-item input[type=checkbox] { accent-color: var(--blue); width: 15px; height: 15px; flex-shrink: 0; }
+  .option-item label { font-size: 13px; cursor: pointer; }
+
+  /* ANALYZE BUTTON */
+  .analyze-btn { width: 100%; background: linear-gradient(135deg,#10b981,#3b82f6); color: white; border: none; padding: 14px; border-radius: 10px; font-size: 15px; font-weight: 700; cursor: pointer; transition: opacity 0.2s, transform 0.1s; letter-spacing: 0.3px; }
+  .analyze-btn:hover:not(:disabled) { opacity: 0.88; transform: translateY(-1px); }
+  .analyze-btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
+
+  .chat-toggle-btn { width: 100%; background: var(--surface2); border: 1px solid var(--border); color: var(--blue); padding: 10px; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; transition: background 0.2s; }
+  .chat-toggle-btn:hover { background: #0d1a2e; }
+
+  /* CONTENT AREA */
+  .content { padding: 28px; overflow-y: auto; display: flex; flex-direction: column; gap: 0; }
+
+  /* WELCOME */
+  .welcome { text-align: center; padding: 60px 20px; }
+  .welcome .big-icon { font-size: 64px; margin-bottom: 20px; }
+  .welcome h2 { font-size: 24px; font-weight: 700; margin-bottom: 10px; }
+  .welcome p { color: var(--muted); max-width: 420px; margin: 0 auto; font-size: 14px; line-height: 1.7; }
+  .welcome .steps { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; margin-top: 32px; text-align: left; }
+  .step { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px; }
+  .step .num { font-size: 11px; font-weight: 700; color: var(--blue); margin-bottom: 6px; }
+  .step p { font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+  /* LOADING */
+  .loading-screen { text-align: center; padding: 80px 20px; display: none; }
+  .spinner { width: 52px; height: 52px; border: 4px solid var(--border); border-top-color: var(--blue); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 20px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-screen h3 { font-size: 18px; margin-bottom: 8px; }
+  .loading-screen p { color: var(--muted); font-size: 14px; }
+  .loading-progress { display: flex; flex-direction: column; gap: 8px; margin-top: 24px; max-width: 320px; margin-left: auto; margin-right: auto; }
+  .prog-item { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--muted); }
+  .prog-item.done { color: var(--green); }
+  .prog-item.active { color: var(--blue); }
+
+  /* RESULTS */
+  .results { display: none; }
+
+  /* STAT CARDS */
+  .stat-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px,1fr)); gap: 12px; margin-bottom: 24px; }
+  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 18px; text-align: center; }
+  .stat-card .s-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 6px; }
+  .stat-card .s-val { font-size: 22px; font-weight: 800; }
+
+  /* SECTIONS */
+  .r-section { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 18px; }
+  .r-section.danger { border-color: #ef4444; }
+  .r-section h3 { font-size: 16px; font-weight: 700; margin-bottom: 16px; }
+
+  /* SUB CARDS */
+  .sub-item { background: var(--surface2); border-radius: 10px; padding: 12px 16px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: flex-start; border-left: 3px solid var(--border); }
+  .sub-item.high { border-left-color: var(--red); }
+  .sub-item.medium { border-left-color: var(--yellow); }
+  .sub-item.low { border-left-color: var(--green); }
+  .sub-name { font-weight: 700; font-size: 14px; margin-bottom: 3px; }
+  .sub-reason { font-size: 12px; color: var(--muted); }
+  .sub-right { text-align: right; flex-shrink: 0; margin-left: 12px; }
+  .sub-amt { font-size: 15px; font-weight: 800; }
+  .badge { display: inline-block; font-size: 10px; padding: 2px 8px; border-radius: 12px; margin-top: 4px; font-weight: 600; }
+  .b-red { background: #450a0a; color: var(--red); }
+  .b-yellow { background: #431407; color: var(--yellow); }
+  .b-green { background: #052e16; color: #4ade80; }
+
+  /* CAT BARS */
+  .cat-item { margin-bottom: 12px; }
+  .cat-head { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 5px; }
+  .bar-bg { background: var(--surface2); border-radius: 4px; height: 8px; }
+  .bar-fill { height: 100%; border-radius: 4px; }
+
+  /* HIDDEN CHARGES */
+  .hc-item { background: var(--surface2); border-radius: 10px; padding: 12px 16px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+  .hc-desc { font-size: 14px; font-weight: 600; margin-bottom: 3px; }
+  .hc-detail { font-size: 12px; color: var(--muted); }
+  .hc-amount { font-size: 16px; font-weight: 800; color: var(--red); flex-shrink: 0; margin-left: 12px; }
+
+  /* INSIGHTS */
+  .insight-item { background: var(--surface2); border-radius: 10px; padding: 12px 16px; margin-bottom: 8px; display: flex; gap: 14px; }
+  .i-icon { font-size: 24px; flex-shrink: 0; }
+  .i-title { font-weight: 700; font-size: 14px; margin-bottom: 3px; }
+  .i-desc { font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+  /* CHAT */
+  .chat-panel { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 18px; display: none; flex-direction: column; height: 420px; }
+  .chat-panel.open { display: flex; }
+  .chat-messages { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+  .chat-msg { max-width: 80%; padding: 10px 14px; border-radius: 10px; font-size: 13px; line-height: 1.5; }
+  .chat-msg.user { background: #1e3a5f; color: #93c5fd; align-self: flex-end; border-radius: 10px 10px 2px 10px; }
+  .chat-msg.assistant { background: var(--surface2); color: var(--text); align-self: flex-start; border-radius: 10px 10px 10px 2px; }
+  .chat-msg.loading { color: var(--muted); font-style: italic; }
+  .chat-input-row { display: flex; gap: 8px; padding: 12px; border-top: 1px solid var(--border); }
+  .chat-input-row input { flex: 1; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 9px 14px; color: var(--text); font-size: 13px; }
+  .chat-input-row input:focus { outline: none; border-color: var(--blue); }
+  .chat-send { background: var(--blue); border: none; border-radius: 8px; padding: 9px 16px; color: #0b0f1c; font-weight: 700; cursor: pointer; font-size: 13px; }
+  .chat-send:hover { opacity: 0.85; }
+
+  .savings-highlight { background: linear-gradient(135deg,#052e16,#0a3528); border: 1px solid #10b981; border-radius: 10px; padding: 16px; text-align: center; margin-top: 12px; }
+  .savings-highlight .s-num { font-size: 30px; font-weight: 900; color: var(--green); }
+
+  .error-box { background: #1a0a0a; border: 1px solid var(--red); border-radius: 10px; padding: 16px; color: #fca5a5; font-size: 14px; margin-bottom: 18px; }
+
+  /* monthly bars */
+  .month-row { display: grid; grid-template-columns: 130px 1fr 90px; align-items: center; gap: 10px; margin-bottom: 8px; }
+  .month-label { font-size: 12px; color: var(--muted); }
+  .m-bar-bg { background: var(--surface2); border-radius: 4px; height: 24px; overflow: hidden; position: relative; }
+  .m-bar { height: 100%; display: flex; align-items: center; padding-left: 8px; font-size: 11px; font-weight: 600; color: white; border-radius: 4px; }
+  .m-amount { font-size: 13px; font-weight: 700; text-align: right; }
+
+  /* transaction table */
+  .tx-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .tx-table th { text-align: left; color: var(--muted); padding: 7px 10px; border-bottom: 1px solid var(--border); font-size: 11px; text-transform: uppercase; }
+  .tx-table td { padding: 9px 10px; border-bottom: 1px solid var(--surface2); }
+  .tx-table tr:hover td { background: var(--surface2); }
+  .cat-tag { font-size: 10px; padding: 2px 7px; border-radius: 10px; }
+
+  #fileInput { display: none; }
+  .no-files { font-size: 12px; color: var(--muted); text-align: center; padding: 10px 0; }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>💳 Credit Card AI Agent</h1>
+    <p>Analyze any number of statements · No chat limits · Fully portable</p>
+  </div>
+  <div class="api-bar">
+    <input type="password" id="apiKeyInput" placeholder="Enter your Anthropic API key..." autocomplete="off">
+    <span class="api-badge bad" id="apiBadge">No Key</span>
+  </div>
+</header>
+
+<div class="main">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div>
+      <h3>📄 Upload Statements</h3>
+      <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
+        <div class="dz-icon">🗂️</div>
+        <p>Drop PDFs or CSVs here<br><strong>No limit on files</strong><br><span style="font-size:11px">PDF, CSV, TXT, XLSX accepted</span></p>
+      </div>
+      <input type="file" id="fileInput" multiple accept=".pdf,.csv,.txt,.xlsx,.xls">
+    </div>
+
+    <div>
+      <h3>📁 Uploaded Files</h3>
+      <div class="file-list" id="fileList">
+        <div class="no-files">No files yet</div>
+      </div>
+    </div>
+
+    <div>
+      <h3>🔍 Analysis Options</h3>
+      <div class="option-grid">
+        <div class="option-item">
+          <input type="checkbox" id="opt-subs" checked>
+          <label for="opt-subs">🔄 Find all subscriptions</label>
+        </div>
+        <div class="option-item">
+          <input type="checkbox" id="opt-hidden" checked>
+          <label for="opt-hidden">🕵️ Detect hidden charges</label>
+        </div>
+        <div class="option-item">
+          <input type="checkbox" id="opt-cats" checked>
+          <label for="opt-cats">📊 Categorize spending</label>
+        </div>
+        <div class="option-item">
+          <input type="checkbox" id="opt-merchants" checked>
+          <label for="opt-merchants">🏪 Top merchants</label>
+        </div>
+        <div class="option-item">
+          <input type="checkbox" id="opt-insights" checked>
+          <label for="opt-insights">💡 AI insights</label>
+        </div>
+        <div class="option-item">
+          <input type="checkbox" id="opt-trends" checked>
+          <label for="opt-trends">📈 Monthly trends</label>
+        </div>
+      </div>
+    </div>
+
+    <button class="analyze-btn" id="analyzeBtn" onclick="runAnalysis()" disabled>
+      🔍 Analyze My Statements
+    </button>
+
+    <button class="chat-toggle-btn" id="chatToggleBtn" onclick="toggleChat()" disabled>
+      💬 Ask a follow-up question
+    </button>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content" id="contentArea">
+
+    <!-- WELCOME -->
+    <div class="welcome" id="welcomeScreen">
+      <div class="big-icon">💳</div>
+      <h2>Your Personal Credit Card AI Agent</h2>
+      <p>Upload any number of bank statements and I'll find hidden subscriptions, flag predatory charges, categorize your spending, and tell you exactly where to save money.</p>
+      <div class="steps">
+        <div class="step"><div class="num">STEP 1</div><p>Enter your Anthropic API key in the top right (get one free at console.anthropic.com)</p></div>
+        <div class="step"><div class="num">STEP 2</div><p>Upload as many PDF or CSV statements as you want — no limits here</p></div>
+        <div class="step"><div class="num">STEP 3</div><p>Click Analyze and get a full financial breakdown with cancellation recommendations</p></div>
+      </div>
+      <p style="margin-top:24px;font-size:12px;color:#374151">🔒 Your data stays in your browser. Files are sent directly to Anthropic's API and never stored.</p>
+    </div>
+
+    <!-- LOADING -->
+    <div class="loading-screen" id="loadingScreen">
+      <div class="spinner"></div>
+      <h3 id="loadingTitle">Analyzing your statements...</h3>
+      <p id="loadingSubtitle">This may take 30–60 seconds for multiple files</p>
+      <div class="loading-progress" id="loadingProgress"></div>
+    </div>
+
+    <!-- RESULTS -->
+    <div class="results" id="resultsArea">
+
+      <!-- CHAT -->
+      <div class="chat-panel" id="chatPanel">
+        <div class="chat-messages" id="chatMessages">
+          <div class="chat-msg assistant">Hi! I've analyzed your statements. Ask me anything — "Which subscriptions should I cancel first?", "How much did I spend on food?", "Are there any fraudulent charges?" etc.</div>
+        </div>
+        <div class="chat-input-row">
+          <input type="text" id="chatInput" placeholder="Ask about your spending..." onkeydown="if(event.key==='Enter')sendChat()">
+          <button class="chat-send" onclick="sendChat()">Send</button>
+        </div>
+      </div>
+
+      <div id="resultsContent"></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ─── STATE ───────────────────────────────────────────────────────────────────
+let uploadedFiles = [];
+let analysisData = null;
+let chatHistory = [];
+let statementContext = '';
+
+// ─── API KEY ─────────────────────────────────────────────────────────────────
+const apiInput = document.getElementById('apiKeyInput');
+const apiBadge = document.getElementById('apiBadge');
+
+apiInput.addEventListener('input', () => {
+  const val = apiInput.value.trim();
+  const valid = val.startsWith('sk-ant-') && val.length > 20;
+  apiBadge.textContent = valid ? '✓ Key Set' : 'No Key';
+  apiBadge.className = 'api-badge ' + (valid ? 'ok' : 'bad');
+  updateButtons();
+});
+
+// ─── FILE HANDLING ────────────────────────────────────────────────────────────
+const dropZone = document.getElementById('dropZone');
+const fileInput = document.getElementById('fileInput');
+
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag'));
+dropZone.addEventListener('drop', e => { e.preventDefault(); dropZone.classList.remove('drag'); handleFiles(e.dataTransfer.files); });
+fileInput.addEventListener('change', e => handleFiles(e.target.files));
+
+function handleFiles(files) {
+  for (const f of files) {
+    if (!uploadedFiles.find(x => x.name === f.name)) uploadedFiles.push(f);
+  }
+  renderFileList();
+  updateButtons();
+  fileInput.value = '';
+}
+
+function removeFile(i) {
+  uploadedFiles.splice(i, 1);
+  renderFileList();
+  updateButtons();
+}
+
+function renderFileList() {
+  const list = document.getElementById('fileList');
+  if (!uploadedFiles.length) { list.innerHTML = '<div class="no-files">No files yet</div>'; return; }
+  list.innerHTML = uploadedFiles.map((f, i) => `
+    <div class="file-item">
+      <span>📄 ${f.name}</span>
+      <span class="file-size">${(f.size/1024).toFixed(0)}KB</span>
+      <button onclick="removeFile(${i})">×</button>
+    </div>
+  `).join('');
+}
+
+function updateButtons() {
+  const hasKey = apiInput.value.trim().startsWith('sk-ant-');
+  const hasFiles = uploadedFiles.length > 0;
+  document.getElementById('analyzeBtn').disabled = !(hasKey && hasFiles);
+  document.getElementById('chatToggleBtn').disabled = !analysisData;
+}
+
+// ─── FILE READING ─────────────────────────────────────────────────────────────
+async function readFileAsBase64(file) {
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = e => res(e.target.result.split(',')[1]);
+    r.onerror = rej;
+    r.readAsDataURL(file);
+  });
+}
+async function readFileAsText(file) {
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = e => res(e.target.result);
+    r.onerror = rej;
+    r.readAsText(file);
+  });
+}
+
+// ─── LOADING UI ──────────────────────────────────────────────────────────────
+const loadingMessages = [
+  { text: 'Reading your PDF statements...', time: 0 },
+  { text: 'Extracting all transactions...', time: 4000 },
+  { text: 'Identifying recurring charges...', time: 9000 },
+  { text: 'Hunting for hidden subscriptions...', time: 14000 },
+  { text: 'Categorizing your spending...', time: 20000 },
+  { text: 'Flagging suspicious charges...', time: 26000 },
+  { text: 'Generating personalized insights...', time: 32000 },
+  { text: 'Almost done — compiling your report...', time: 40000 },
+];
+
+let loadingTimers = [];
+function startLoadingMessages() {
+  const prog = document.getElementById('loadingProgress');
+  prog.innerHTML = loadingMessages.map((m,i) => `<div class="prog-item" id="prog-${i}">⏳ ${m.text}</div>`).join('');
+  loadingTimers.forEach(clearTimeout);
+  loadingTimers = [];
+  loadingMessages.forEach((m, i) => {
+    const t = setTimeout(() => {
+      if (i > 0) document.getElementById(`prog-${i-1}`).className = 'prog-item done';
+      const el = document.getElementById(`prog-${i}`);
+      if (el) { el.className = 'prog-item active'; el.textContent = '🔵 ' + m.text; }
+      document.getElementById('loadingTitle').textContent = m.text;
+    }, m.time);
+    loadingTimers.push(t);
+  });
+}
+
+function show(id) {
+  ['welcomeScreen','loadingScreen','resultsArea'].forEach(s => {
+    const el = document.getElementById(s);
+    if (el) el.style.display = s === id ? (s === 'resultsArea' ? 'block' : 'flex') : 'none';
+  });
+  if (id === 'loadingScreen') document.getElementById('loadingScreen').style.display = 'block';
+}
+
+// ─── MAIN ANALYSIS ───────────────────────────────────────────────────────────
+async function runAnalysis() {
+  const apiKey = apiInput.value.trim();
+  if (!apiKey || !uploadedFiles.length) return;
+
+  show('loadingScreen');
+  startLoadingMessages();
+
+  const opts = {
+    subscriptions: document.getElementById('opt-subs').checked,
+    hidden: document.getElementById('opt-hidden').checked,
+    categories: document.getElementById('opt-cats').checked,
+    merchants: document.getElementById('opt-merchants').checked,
+    insights: document.getElementById('opt-insights').checked,
+    trends: document.getElementById('opt-trends').checked,
+  };
+
+  try {
+    // Build content array
+    const userContent = [];
+
+    for (const file of uploadedFiles) {
+      const ext = file.name.toLowerCase().split('.').pop();
+      if (ext === 'pdf') {
+        const b64 = await readFileAsBase64(file);
+        userContent.push({ type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: b64 } });
+        userContent.push({ type: 'text', text: `[Above is file: ${file.name}]` });
+      } else {
+        const text = await readFileAsText(file);
+        userContent.push({ type: 'text', text: `\n--- FILE: ${file.name} ---\n${text.substring(0, 15000)}\n--- END FILE ---\n` });
+      }
+    }
+
+    const analysisInstructions = `
+You are a personal financial AI agent. Analyze ALL the credit card statements provided above.
+
+Return ONLY a valid JSON object — no markdown, no backticks, no explanation before or after. Use this exact structure:
+
+{
+  "summary": {
+    "cardHolder": "name from statement",
+    "bank": "bank name",
+    "totalSpend": 0,
+    "months": 0,
+    "avgMonthly": 0,
+    "uniqueMerchants": 0,
+    "totalTransactions": 0,
+    "currentBalance": 0,
+    "potentialSavings": 0
+  },
+  "monthlyTrend": [
+    { "period": "Dec–Jan 2026", "amount": 0 }
+  ],
+  "categories": [
+    { "name": "Category", "amount": 0, "count": 0, "color": "#hexcolor", "pct": 0 }
+  ],
+  "subscriptions": [
+    {
+      "name": "Service Name",
+      "amount": 0,
+      "frequency": "Monthly",
+      "annualCost": 0,
+      "risk": "high|medium|low",
+      "reason": "Why this is risky or wasteful",
+      "recommendation": "Cancel|Keep|Review",
+      "cancelUrl": "website or phone number to cancel"
+    }
+  ],
+  "hiddenCharges": [
+    { "description": "Charge description", "amount": 0, "occurrences": 0, "totalCost": 0, "action": "What to do" }
+  ],
+  "insights": [
+    { "icon": "emoji", "title": "Insight title", "description": "Detailed description" }
+  ],
+  "topMerchants": [
+    { "name": "Merchant", "total": 0, "count": 0, "category": "category" }
+  ],
+  "recentTransactions": [
+    { "date": "YYYY-MM-DD", "merchant": "name", "amount": 0, "category": "category" }
+  ],
+  "actionPlan": [
+    { "priority": "high|medium|low", "action": "What to do", "saving": "$X/year" }
+  ]
+}
+
+Analysis requirements:
+${opts.subscriptions ? '- Find ALL recurring charges as subscriptions. Flag predatory ones (unclear value, hard to cancel, deceptive).' : ''}
+${opts.hidden ? '- Identify hidden charges: foreign transaction fees, mystery merchants, scam impersonators, duplicate charges.' : ''}
+${opts.categories ? '- Categorize spending into: Food & Dining, Transportation, Groceries, Shopping, Education, Entertainment, Subscriptions, Utilities, Healthcare, Travel, Other.' : ''}
+${opts.merchants ? '- List top 10 merchants by total spend.' : ''}
+${opts.insights ? '- Provide 5-7 specific, actionable insights based on the actual data.' : ''}
+${opts.trends ? '- Include monthly trend data.' : ''}
+- Be thorough and specific to the actual transactions. Flag Adobe duplicate charges, SmartyPlus type deceptive subscriptions, and any Dubai/international mystery charges.
+- potentialSavings should be sum of annual costs of subscriptions recommended to Cancel.
+- Include up to 30 recent transactions.`;
+
+    userContent.push({ type: 'text', text: analysisInstructions });
+
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 6000,
+        messages: [{ role: 'user', content: userContent }]
+      })
+    });
+
+    if (!resp.ok) {
+      const err = await resp.json();
+      throw new Error(err.error?.message || `API error ${resp.status}`);
+    }
+
+    const data = await resp.json();
+    const raw = data.content.map(c => c.text || '').join('');
+
+    let parsed;
+    try {
+      parsed = JSON.parse(raw.replace(/```json|```/g, '').trim());
+    } catch {
+      const m = raw.match(/\{[\s\S]*\}/);
+      if (m) parsed = JSON.parse(m[0]);
+      else throw new Error('Could not parse AI response. Try again.');
+    }
+
+    analysisData = parsed;
+    statementContext = raw;
+
+    // Build chat context
+    chatHistory = [{
+      role: 'user',
+      content: `I have analyzed my credit card statements. Here is the summary data: ${JSON.stringify(parsed.summary)}. Subscriptions found: ${JSON.stringify(parsed.subscriptions)}. Hidden charges: ${JSON.stringify(parsed.hiddenCharges)}. Top merchants: ${JSON.stringify(parsed.topMerchants)}. Be ready to answer follow-up questions about my spending.`
+    }, {
+      role: 'assistant',
+      content: `I've analyzed your statements and found ${parsed.subscriptions?.length || 0} subscriptions, potential savings of $${parsed.summary?.potentialSavings || 0}/year, and ${parsed.hiddenCharges?.length || 0} hidden charges. Ask me anything about your spending!`
+    }];
+
+    loadingTimers.forEach(clearTimeout);
+    show('resultsArea');
+    renderResults(parsed);
+    document.getElementById('chatToggleBtn').disabled = false;
+
+  } catch(err) {
+    loadingTimers.forEach(clearTimeout);
+    show('resultsArea');
+    document.getElementById('resultsContent').innerHTML = `
+      <div class="error-box">
+        <strong>⚠️ Analysis Error</strong><br>${err.message}<br><br>
+        <span style="font-size:12px">Check that your API key is correct and your files contain readable text. PDF statements with selectable text work best.</span>
+      </div>`;
+  }
+}
+
+// ─── RENDER RESULTS ───────────────────────────────────────────────────────────
+function fmt(n) { return '$' + (n||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+
+function renderResults(d) {
+  const s = d.summary || {};
+  const subs = d.subscriptions || [];
+  const hidden = d.hiddenCharges || [];
+  const cats = d.categories || [];
+  const insights = d.insights || [];
+  const merchants = d.topMerchants || [];
+  const trend = d.monthlyTrend || [];
+  const txns = d.recentTransactions || [];
+  const plan = d.actionPlan || [];
+
+  const cancelSubs = subs.filter(x => x.recommendation === 'Cancel');
+  const dangerSubs = subs.filter(x => x.risk === 'high');
+  const maxCat = Math.max(...cats.map(c=>c.amount), 1);
+  const maxTrend = Math.max(...trend.map(t=>t.amount), 1);
+
+  const gradients = ['linear-gradient(90deg,#ef4444,#f97316)','linear-gradient(90deg,#3b82f6,#6366f1)','linear-gradient(90deg,#10b981,#06b6d4)','linear-gradient(90deg,#f59e0b,#ef4444)','linear-gradient(90deg,#8b5cf6,#ec4899)','linear-gradient(90deg,#10b981,#3b82f6)','linear-gradient(90deg,#f97316,#fbbf24)'];
+
+  document.getElementById('resultsContent').innerHTML = `
+
+    <!-- STATS -->
+    <div class="stat-row">
+      <div class="stat-card"><div class="s-label">Total Spent</div><div class="s-val" style="color:var(--red)">${fmt(s.totalSpend)}</div></div>
+      <div class="stat-card"><div class="s-label">Avg / Month</div><div class="s-val" style="color:var(--yellow)">${fmt(s.avgMonthly)}</div></div>
+      <div class="stat-card"><div class="s-label">Subscriptions</div><div class="s-val" style="color:var(--purple)">${subs.length}</div></div>
+      <div class="stat-card"><div class="s-label">Hidden Charges</div><div class="s-val" style="color:var(--red)">${hidden.length}</div></div>
+      <div class="stat-card"><div class="s-label">Annual Savings</div><div class="s-val" style="color:var(--green)">${fmt(s.potentialSavings)}</div></div>
+      <div class="stat-card"><div class="s-label">Balance</div><div class="s-val" style="color:var(--orange)">${fmt(s.currentBalance)}</div></div>
+    </div>
+
+    ${dangerSubs.length ? `
+    <!-- DANGER SUBS -->
+    <div class="r-section danger">
+      <h3>🚨 Cancel These Immediately</h3>
+      ${dangerSubs.map(sub => `
+        <div class="sub-item high">
+          <div>
+            <div class="sub-name">${sub.name}</div>
+            <div class="sub-reason">${sub.reason}${sub.cancelUrl ? ` · <span style="color:var(--blue)">${sub.cancelUrl}</span>` : ''}</div>
+          </div>
+          <div class="sub-right">
+            <div class="sub-amt" style="color:var(--red)">${fmt(sub.amount)}/mo</div>
+            <div style="font-size:11px;color:var(--muted)">${fmt(sub.annualCost)}/yr</div>
+            <span class="badge b-red">⚠️ CANCEL</span>
+          </div>
+        </div>
+      `).join('')}
+      <div class="savings-highlight">
+        <div class="s-num">${fmt(dangerSubs.reduce((a,s)=>a+(s.annualCost||s.amount*12),0))}</div>
+        <p style="color:#6ee7b7;font-size:13px;margin-top:4px">saved per year by cancelling these</p>
+      </div>
+    </div>` : ''}
+
+    ${trend.length ? `
+    <!-- MONTHLY TREND -->
+    <div class="r-section">
+      <h3>📈 Monthly Spending Trend</h3>
+      ${trend.map((t,i) => `
+        <div class="month-row">
+          <div class="month-label">${t.period}</div>
+          <div class="m-bar-bg"><div class="m-bar" style="width:${Math.round(t.amount/maxTrend*100)}%;${gradients[i%gradients.length].includes('ef4444')?'background:'+gradients[i%gradients.length]:'background:'+gradients[i%gradients.length]}">${fmt(t.amount)}</div></div>
+          <div class="m-amount">${fmt(t.amount)}</div>
+        </div>
+      `).join('')}
+    </div>` : ''}
+
+    <!-- ALL SUBS -->
+    <div class="r-section">
+      <h3>🔄 All Subscriptions (${subs.length} found)</h3>
+      ${subs.map(sub => `
+        <div class="sub-item ${sub.risk}">
+          <div>
+            <div class="sub-name">${sub.name}</div>
+            <div class="sub-reason">${sub.frequency} · ${sub.reason}</div>
+          </div>
+          <div class="sub-right">
+            <div class="sub-amt">${fmt(sub.amount)}/mo</div>
+            <span class="badge ${sub.recommendation==='Cancel'?'b-red':sub.recommendation==='Keep'?'b-green':'b-yellow'}">${sub.recommendation}</span>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+
+    ${cats.length ? `
+    <!-- CATEGORIES -->
+    <div class="r-section">
+      <h3>📊 Spending by Category</h3>
+      ${cats.sort((a,b)=>b.amount-a.amount).map(cat => `
+        <div class="cat-item">
+          <div class="cat-head">
+            <span>${cat.name} <span style="color:var(--muted);font-size:11px">(${cat.count||''} transactions)</span></span>
+            <span style="font-weight:700">${fmt(cat.amount)} <span style="color:var(--muted);font-size:11px">${cat.pct||''}%</span></span>
+          </div>
+          <div class="bar-bg"><div class="bar-fill" style="width:${Math.round(cat.amount/maxCat*100)}%;background:${cat.color||'#60a5fa'}"></div></div>
+        </div>
+      `).join('')}
+    </div>` : ''}
+
+    ${hidden.length ? `
+    <!-- HIDDEN CHARGES -->
+    <div class="r-section">
+      <h3>🕵️ Hidden &amp; Suspicious Charges</h3>
+      ${hidden.map(h => `
+        <div class="hc-item">
+          <div>
+            <div class="hc-desc">${h.description}</div>
+            <div class="hc-detail">${h.occurrences} occurrence(s) · ${h.action||''}</div>
+          </div>
+          <div class="hc-amount">${fmt(h.totalCost)}</div>
+        </div>
+      `).join('')}
+    </div>` : ''}
+
+    ${insights.length ? `
+    <!-- INSIGHTS -->
+    <div class="r-section">
+      <h3>💡 AI Insights</h3>
+      ${insights.map(i => `
+        <div class="insight-item">
+          <div class="i-icon">${i.icon}</div>
+          <div>
+            <div class="i-title">${i.title}</div>
+            <div class="i-desc">${i.description}</div>
+          </div>
+        </div>
+      `).join('')}
+    </div>` : ''}
+
+    ${merchants.length ? `
+    <!-- TOP MERCHANTS -->
+    <div class="r-section">
+      <h3>🏪 Top Merchants</h3>
+      <table class="tx-table">
+        <thead><tr><th>Merchant</th><th>Category</th><th>Visits</th><th>Total</th></tr></thead>
+        <tbody>
+          ${merchants.slice(0,12).map(m => `
+            <tr>
+              <td style="font-weight:600">${m.name}</td>
+              <td><span class="cat-tag" style="background:var(--surface2);color:var(--muted)">${m.category||''}</span></td>
+              <td style="color:var(--muted)">${m.count}</td>
+              <td style="font-weight:700">${fmt(m.total)}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>` : ''}
+
+    ${plan.length ? `
+    <!-- ACTION PLAN -->
+    <div class="r-section">
+      <h3>✅ Your Action Plan</h3>
+      ${plan.map(p => `
+        <div class="hc-item" style="border-left:3px solid ${p.priority==='high'?'var(--red)':p.priority==='medium'?'var(--yellow)':'var(--green)'}">
+          <div>
+            <div class="hc-desc">${p.action}</div>
+          </div>
+          <div style="color:var(--green);font-weight:700;flex-shrink:0;margin-left:12px">${p.saving||''}</div>
+        </div>
+      `).join('')}
+    </div>` : ''}
+
+    ${txns.length ? `
+    <!-- TRANSACTIONS -->
+    <div class="r-section">
+      <h3>📋 Recent Transactions</h3>
+      <table class="tx-table">
+        <thead><tr><th>Date</th><th>Merchant</th><th>Category</th><th>Amount</th></tr></thead>
+        <tbody>
+          ${txns.slice(0,30).map(t => `
+            <tr>
+              <td style="color:var(--muted)">${t.date||''}</td>
+              <td>${t.merchant}</td>
+              <td><span class="cat-tag" style="background:var(--surface2);color:var(--muted)">${t.category||''}</span></td>
+              <td style="font-weight:700">${fmt(t.amount)}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>` : ''}
+
+    <div style="text-align:center;padding:20px 0;color:#374151;font-size:11px">
+      Analyzed ${uploadedFiles.length} statement(s) · Powered by Claude AI · Data stays in your browser
+    </div>
+  `;
+}
+
+// ─── CHAT ────────────────────────────────────────────────────────────────────
+function toggleChat() {
+  const panel = document.getElementById('chatPanel');
+  panel.classList.toggle('open');
+  if (panel.classList.contains('open')) {
+    document.getElementById('chatInput').focus();
+  }
+}
+
+async function sendChat() {
+  const input = document.getElementById('chatInput');
+  const msg = input.value.trim();
+  if (!msg) return;
+  input.value = '';
+
+  const msgs = document.getElementById('chatMessages');
+  msgs.innerHTML += `<div class="chat-msg user">${msg}</div>`;
+  msgs.innerHTML += `<div class="chat-msg loading" id="chatLoading">Thinking...</div>`;
+  msgs.scrollTop = msgs.scrollHeight;
+
+  chatHistory.push({ role: 'user', content: msg });
+
+  try {
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiInput.value.trim(),
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 1000,
+        system: `You are a personal financial assistant. The user has just analyzed their credit card statements. Analysis data: ${JSON.stringify(analysisData)}. Answer questions about their spending concisely and helpfully. Be specific with numbers from the data.`,
+        messages: chatHistory
+      })
+    });
+
+    const data = await resp.json();
+    const reply = data.content[0]?.text || 'Sorry, I could not generate a response.';
+    chatHistory.push({ role: 'assistant', content: reply });
+
+    document.getElementById('chatLoading').remove();
+    msgs.innerHTML += `<div class="chat-msg assistant">${reply.replace(/\n/g,'<br>')}</div>`;
+    msgs.scrollTop = msgs.scrollHeight;
+
+  } catch(err) {
+    document.getElementById('chatLoading').remove();
+    msgs.innerHTML += `<div class="chat-msg assistant" style="color:var(--red)">Error: ${err.message}</div>`;
+  }
+}
+</script>
+</body>
+</html>
