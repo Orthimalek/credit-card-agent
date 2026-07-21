@@ -12,126 +12,6 @@
   --text:#0f172a; --text2:#334155; --muted:#64748b; --border:#e2e8f0;
   --bg:#f8fafc; --card:#ffffff;
 }
-/* ── OFFLINE / DARK MODE ── */
-/* ════════════════════════════════════════
-   OFFLINE / DARK MODE
-   ════════════════════════════════════════ */
-body.offline-mode {
-  --primary:#34d399; --primary-l:rgba(52,211,153,0.12);
-  --text:#e2e8f0; --text2:#94a3b8; --muted:#475569; --border:#1e293b;
-  --bg:#0a0f1e; --card:#111827;
-  background:#0a0f1e !important;
-  color:#e2e8f0;
-  transition: background 0.4s, color 0.4s;
-}
-
-/* Body & main */
-body.offline-mode .main { background:#0a0f1e; }
-
-/* Header */
-body.offline-mode .site-header {
-  background:linear-gradient(135deg,#020617 0%,#0d1b2a 100%) !important;
-  border-bottom:1px solid #1e293b;
-}
-
-/* Trust bar */
-body.offline-mode .trust-bar { background:#020617 !important; border-bottom:1px solid #0f172a; }
-
-/* Tabs */
-body.offline-mode .tabs { background:#111827 !important; border-color:#1e293b !important; }
-body.offline-mode .tab { color:#475569 !important; border-right-color:#1e293b !important; }
-body.offline-mode .tab.active { color:#34d399 !important; background:rgba(52,211,153,0.08) !important; }
-
-/* How-to steps */
-body.offline-mode .how-step { background:#111827 !important; border-color:#1e293b !important; }
-body.offline-mode .how-title { color:#e2e8f0 !important; }
-body.offline-mode .how-sub { color:#475569 !important; }
-body.offline-mode .how-num { background:#34d399 !important; color:#0a0f1e !important; }
-
-/* Drop zone */
-body.offline-mode .drop-zone { background:#111827 !important; border-color:#1e293b !important; }
-body.offline-mode .drop-zone.drag { border-color:#34d399 !important; background:rgba(52,211,153,0.05) !important; }
-body.offline-mode .dz-title { color:#e2e8f0 !important; }
-body.offline-mode .dz-sub { color:#475569 !important; }
-
-/* File list */
-body.offline-mode .file-item { background:#111827 !important; border-color:#1e293b !important; }
-body.offline-mode .file-name { color:#34d399 !important; }
-body.offline-mode .file-size { color:#475569 !important; }
-body.offline-mode .no-files { color:#475569 !important; }
-
-/* Analyze button */
-body.offline-mode .btn-analyze:not(:disabled) { background:#34d399 !important; color:#0a0f1e !important; font-weight:900 !important; }
-body.offline-mode .btn-analyze:disabled { background:#1e293b !important; color:#334155 !important; }
-
-/* Error box */
-body.offline-mode .error-box { background:rgba(220,38,38,0.12) !important; border-color:#dc2626 !important; color:#fca5a5 !important; }
-
-/* Report cards */
-body.offline-mode .stat-card { background:#111827 !important; border-color:#1e293b !important; }
-body.offline-mode .stat-label { color:#475569 !important; }
-
-/* Sections */
-body.offline-mode .section { background:#111827 !important; border-color:#1e293b !important; }
-body.offline-mode .section.alert-red { background:rgba(220,38,38,0.08) !important; border-color:#7f1d1d !important; }
-body.offline-mode .section.alert-yellow { background:rgba(217,119,6,0.08) !important; border-color:#78350f !important; }
-body.offline-mode .section-title { color:#e2e8f0 !important; }
-
-/* Sub items */
-body.offline-mode .sub-item { border-bottom-color:#1e293b !important; }
-body.offline-mode .sub-name { color:#e2e8f0 !important; }
-body.offline-mode .sub-reason { color:#475569 !important; }
-body.offline-mode .sub-cancel { color:#34d399 !important; }
-body.offline-mode .sub-step { color:#94a3b8 !important; }
-body.offline-mode .hc-name { color:#e2e8f0 !important; }
-body.offline-mode .hc-detail { color:#475569 !important; }
-body.offline-mode .hc-action { color:#34d399 !important; }
-body.offline-mode .hc-item { border-bottom-color:#1e293b !important; }
-body.offline-mode .action-item { border-bottom-color:#1e293b !important; }
-body.offline-mode .action-title { color:#e2e8f0 !important; }
-body.offline-mode .action-desc { color:#475569 !important; }
-body.offline-mode .action-step { color:#94a3b8 !important; }
-body.offline-mode .insight-item { border-bottom-color:#1e293b !important; }
-body.offline-mode .ins-title { color:#e2e8f0 !important; }
-body.offline-mode .ins-desc { color:#475569 !important; }
-body.offline-mode .cat-head { color:#e2e8f0 !important; }
-body.offline-mode .bar-bg { background:#1e293b !important; }
-body.offline-mode .savings-box { background:rgba(5,150,105,0.12) !important; }
-
-/* Dividers */
-body.offline-mode .divider { color:#334155 !important; }
-body.offline-mode .divider::before, body.offline-mode .divider::after { background:#1e293b !important; }
-
-/* History */
-body.offline-mode .history-item { background:#111827 !important; border-color:#1e293b !important; }
-body.offline-mode .h-stat { background:#0a0f1e !important; color:#475569 !important; }
-body.offline-mode .results-empty { color:#475569 !important; }
-body.offline-mode .ri { opacity:0.4; }
-
-/* Privacy tab */
-body.offline-mode .trust-section { background:rgba(52,211,153,0.05) !important; border-color:#1e293b !important; }
-body.offline-mode .trust-title { color:#34d399 !important; }
-body.offline-mode .trust-point { color:#94a3b8 !important; }
-body.offline-mode .trust-icon { filter:brightness(0.8); }
-body.offline-mode .verify-btn { background:#111827 !important; border-color:#1e293b !important; }
-
-/* Footer */
-body.offline-mode .site-footer { background:#020617 !important; }
-body.offline-mode .footer-logo { color:#34d399 !important; }
-body.offline-mode .footer-tagline { color:#334155 !important; }
-body.offline-mode .footer-links a { color:#334155 !important; }
-body.offline-mode .footer-privacy { background:#020617 !important; border-color:#0f172a !important; color:#334155 !important; }
-
-/* Offline banner */
-body.offline-mode .offline-banner { background:rgba(52,211,153,0.08); border-color:#34d399; color:#34d399; display:flex !important; }
-
-/* Smooth transitions on key elements */
-body, .site-header, .trust-bar, .tabs, .tab, .drop-zone,
-.file-item, .stat-card, .section, .history-item, .how-step,
-.btn-analyze, .site-footer { transition: background 0.35s, border-color 0.35s, color 0.35s; }
-
-/* Mode toggle button */
-
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
 
@@ -296,12 +176,64 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   .how-title{font-size:10px}
   .how-num{width:24px;height:24px;font-size:11px}
 }
-.fs-switch{position:relative;display:inline-block;width:40px;height:22px;flex-shrink:0;cursor:pointer}
-.fs-switch input{opacity:0;width:0;height:0;position:absolute}
-.fs-slider{position:absolute;top:0;left:0;right:0;bottom:0;background:#334155;border-radius:22px;transition:.25s;pointer-events:none}
-.fs-slider:before{position:absolute;content:"";height:16px;width:16px;left:3px;bottom:3px;background:white;border-radius:50%;transition:.25s}
-.fs-switch input:checked + .fs-slider{background:#34d399}
-.fs-switch input:checked + .fs-slider:before{transform:translateX(18px)}
+
+/* ── OFFLINE DARK MODE ── */
+body.offline-mode {
+  --primary:#34d399; --primary-l:rgba(52,211,153,0.12);
+  --text:#e2e8f0; --text2:#94a3b8; --muted:#475569; --border:#1e293b;
+  --bg:#0a0f1e; --card:#111827;
+  background:#0a0f1e !important; color:#e2e8f0;
+}
+body.offline-mode .main { background:#0a0f1e; }
+body.offline-mode .site-header { background:linear-gradient(135deg,#020617,#0d1b2a) !important; }
+body.offline-mode .trust-bar { background:#020617 !important; }
+body.offline-mode .tabs { background:#111827 !important; border-color:#1e293b !important; }
+body.offline-mode .tab { color:#475569 !important; border-right-color:#1e293b !important; }
+body.offline-mode .tab.active { color:#34d399 !important; background:rgba(52,211,153,0.08) !important; }
+body.offline-mode .how-step { background:#111827 !important; border-color:#1e293b !important; }
+body.offline-mode .how-title { color:#e2e8f0 !important; }
+body.offline-mode .how-sub { color:#475569 !important; }
+body.offline-mode .drop-zone { background:#111827 !important; border-color:#1e293b !important; }
+body.offline-mode .dz-title { color:#e2e8f0 !important; }
+body.offline-mode .dz-sub { color:#475569 !important; }
+body.offline-mode .file-item { background:#111827 !important; border-color:#1e293b !important; }
+body.offline-mode .file-name { color:#34d399 !important; }
+body.offline-mode .no-files { color:#475569 !important; }
+body.offline-mode .btn-analyze:not(:disabled) { background:#34d399 !important; color:#0a0f1e !important; }
+body.offline-mode .btn-analyze:disabled { background:#1e293b !important; color:#334155 !important; }
+body.offline-mode .stat-card { background:#111827 !important; border-color:#1e293b !important; }
+body.offline-mode .section { background:#111827 !important; border-color:#1e293b !important; }
+body.offline-mode .section.alert-red { background:rgba(220,38,38,0.08) !important; border-color:#7f1d1d !important; }
+body.offline-mode .section.alert-yellow { background:rgba(217,119,6,0.08) !important; border-color:#78350f !important; }
+body.offline-mode .section-title { color:#e2e8f0 !important; }
+body.offline-mode .sub-item, body.offline-mode .hc-item, body.offline-mode .action-item, body.offline-mode .insight-item { border-bottom-color:#1e293b !important; }
+body.offline-mode .sub-name, body.offline-mode .hc-name, body.offline-mode .action-title, body.offline-mode .ins-title { color:#e2e8f0 !important; }
+body.offline-mode .sub-reason, body.offline-mode .hc-detail, body.offline-mode .action-desc, body.offline-mode .ins-desc { color:#475569 !important; }
+body.offline-mode .sub-cancel, body.offline-mode .hc-action { color:#34d399 !important; }
+body.offline-mode .bar-bg { background:#1e293b !important; }
+body.offline-mode .savings-box { background:rgba(5,150,105,0.12) !important; }
+body.offline-mode .divider { color:#334155 !important; }
+body.offline-mode .divider::before, body.offline-mode .divider::after { background:#1e293b !important; }
+body.offline-mode .history-item { background:#111827 !important; border-color:#1e293b !important; }
+body.offline-mode .h-stat { background:#0a0f1e !important; color:#475569 !important; }
+body.offline-mode .results-empty { color:#475569 !important; }
+body.offline-mode .trust-section { background:rgba(52,211,153,0.05) !important; border-color:#1e293b !important; }
+body.offline-mode .trust-title { color:#34d399 !important; }
+body.offline-mode .trust-point { color:#94a3b8 !important; }
+body.offline-mode .site-footer { background:#020617 !important; }
+body.offline-mode .footer-privacy { background:#020617 !important; border-color:#0f172a !important; color:#334155 !important; }
+body, .site-header, .trust-bar, .tabs, .tab, .drop-zone, .file-item,
+.stat-card, .section, .history-item, .how-step, .btn-analyze, .site-footer {
+  transition: background 0.35s, border-color 0.35s, color 0.35s;
+}
+
+/* ── SLIDER SWITCH ── */
+.fs-switch { position:relative; display:inline-block; width:40px; height:22px; flex-shrink:0; cursor:pointer; }
+.fs-switch input { opacity:0; width:0; height:0; position:absolute; }
+.fs-slider { position:absolute; top:0; left:0; right:0; bottom:0; background:#334155; border-radius:22px; transition:.25s; pointer-events:none; }
+.fs-slider:before { position:absolute; content:""; height:16px; width:16px; left:3px; bottom:3px; background:white; border-radius:50%; transition:.25s; }
+.fs-switch input:checked + .fs-slider { background:#34d399; }
+.fs-switch input:checked + .fs-slider:before { transform:translateX(18px); }
 </style>
 </head>
 <body>
@@ -317,13 +249,16 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
       </div>
     </div>
     <div style="display:flex;align-items:center;gap:10px">
-      <div class="local-badge">● Local</div>
-      <div style="display:flex;align-items:center;gap:6px">
-        <span id="modeLabel" style="font-size:10px;font-weight:700;color:#34d399;white-space:nowrap">🌐 Online</span>
-        <label class="fs-switch" title="Toggle offline mode"><input type="checkbox" id="offlineToggle" onchange="toggleMode()"><span class="fs-slider"></span></label>
-        <span style="font-size:10px;color:#94a3b8;white-space:nowrap">✈️ Offline</span>
+        <div class="local-badge">● Local</div>
+        <div style="display:flex;align-items:center;gap:6px">
+          <span id="modeLabel" style="font-size:10px;font-weight:700;color:#34d399;white-space:nowrap">🌐 Online</span>
+          <label class="fs-switch" title="Toggle offline/dark mode">
+            <input type="checkbox" id="offlineToggle" onchange="toggleMode()">
+            <span class="fs-slider"></span>
+          </label>
+          <span style="font-size:10px;color:#94a3b8;white-space:nowrap">✈️ Offline</span>
+        </div>
       </div>
-    </div>
   </div>
 </header>
 
@@ -331,7 +266,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 <div class="trust-bar">
   <div class="trust-inner">
     <div class="trust-item">🔒 <strong>0 bytes</strong> sent to any server</div>
-    <div class="trust-item">📡 Requests: <span class="net-counter" id="netCounter">0</span></div>
+    <div class="trust-item">📡 Network requests: <span class="net-counter" id="netCounter">0</span></div>
     <div class="trust-item" id="modeIndicator">🌐 <strong style="color:#34d399">Online Mode</strong></div>
   </div>
 </div>
@@ -340,7 +275,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 
   <!-- ── OFFLINE BANNER ── -->
   <div class="offline-banner" id="offlineBanner">
-    ✈️ You're offline — switch to Offline Mode (toggle above) to analyze PDFs without internet.
+    📵 You're offline — FinSentinel still works perfectly. This proves your data never left your device.
   </div>
 
   <!-- ── TABS ── -->
@@ -413,8 +348,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
       <div class="trust-point"><span class="trust-icon">📡</span><span><strong>Zero network requests.</strong> The counter in the header above shows every outgoing request FinSentinel makes. It will always read 0. You can open browser DevTools → Network and verify this yourself.</span></div>
       <div class="trust-point"><span class="trust-icon">✈️</span><span><strong>Works in airplane mode.</strong> Turn off WiFi right now and upload a statement. It still works — because your data never goes anywhere.</span></div>
       <div class="trust-point"><span class="trust-icon">💾</span><span><strong>History stays on your device.</strong> Your past reports are saved in your browser's localStorage — the same place websites save your preferences. Only you can access it.</span></div>
-
-
+      <div class="trust-point"><span class="trust-icon">👁️</span><span><strong>Open source.</strong> Every line of analysis code is public on GitHub. Anyone can verify what FinSentinel does and doesn't do.</span></div>
+      <button class="verify-btn" onclick="window.open('https://github.com/orthimalek/credit-card-agent','_blank')">
+        🔗 View source code on GitHub
+      </button>
     </div>
 
     <div style="background:white;border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:16px">
@@ -423,6 +360,27 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
         "FinSentinel processes your financial data entirely within your browser — we receive nothing, store nothing, and have no servers."
       </div>
     </div>
+
+    <div style="background:white;border:1px solid var(--border);border-radius:12px;padding:16px">
+      <div style="font-size:13px;font-weight:800;color:var(--text);margin-bottom:10px">🆚 How we compare</div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:8px">vs. other financial tools</div>
+      ${['Rocket Money|Requires bank login, stores your credentials|✗',
+         'Mint (shut down)|Required full account access|✗',
+         'Pine AI|Requires account connection|✗',
+         'FinSentinel|PDF/CSV only, runs locally, no account|✓'
+        ].map(row => {
+          const [name, desc, check] = row.split('|');
+          const good = check === '✓';
+          return `<div style="display:flex;align-items:start;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">
+            <div style="font-size:14px;flex-shrink:0">${good ? '✅' : '❌'}</div>
+            <div style="flex:1">
+              <div style="font-size:11px;font-weight:700;color:${good ? '#059669' : 'var(--text)'}">${name}</div>
+              <div style="font-size:10px;color:var(--muted)">${desc}</div>
+            </div>
+          </div>`;
+        }).join('')}
+    </div>
+  </div>
 
   <!-- ══ HISTORY TAB ══ -->
   <div class="panel" id="tab-history">
@@ -458,7 +416,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 let _netCount = 0;
 const _origFetch = window.fetch;
 window.fetch = function(...args) {
-  // Don't count PDF.js worker CDN as a user-data request
+  // Allow PDF.js CDN load only (one-time, known safe URL)
   const url = String(args[0] || '');
   if (!url.includes('cdnjs.cloudflare.com') && !url.includes('unpkg.com')) {
     _netCount++;
@@ -480,86 +438,25 @@ window.addEventListener('offline', checkOnline);
 checkOnline();
 
 // ══════════════════════════════════════════════════════════
-// PDF.JS — bundled inline, works 100% offline
+// PDF.JS — load from CDN (web version, no chrome.runtime)
 // ══════════════════════════════════════════════════════════
-// Bundled PDF.js 4.4.168 — no network request needed
-
-
 let pdfjs = null;
-// ── Mode state ───────────────────────────────────────────
-let _offlineMode = false;
-let _modeJustSwitched = false;
-const PDFJS_CDN = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
-const PDFJS_WORKER_CDN = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-const PDFJS_FAKE_WORKER = 'data:application/javascript;base64,' + btoa('self.onmessage=function(e){self.postMessage({pdfjsWorker:true})}');
-
 async function loadPDFJS() {
-  if (pdfjs && !_modeJustSwitched) return pdfjs;
-  _modeJustSwitched = false;
-
-  // Load PDF.js library from CDN if not already loaded
-  if (!window.pdfjsLib) {
-    if (_offlineMode) {
-      throw new Error('PDF files require internet on first use even in Offline Mode.\n\nTip: Upload a CSV file instead — it works 100% offline with no libraries needed.\n\nOr switch to Online Mode, load a PDF once (caches the library), then go offline.');
-    }
-    await new Promise((resolve, reject) => {
-      const s = document.createElement('script');
-      s.src = PDFJS_CDN;
-      s.onload = resolve;
-      s.onerror = () => reject(new Error('Could not load PDF library. Check internet connection or upload a CSV file instead.'));
-      document.head.appendChild(s);
-    });
-  }
-
-  // Set worker source based on mode
-  if (_offlineMode) {
-    // Offline mode: fake worker runs PDF parsing in main thread (no extra network request)
-    window.pdfjsLib.GlobalWorkerOptions.workerSrc = PDFJS_FAKE_WORKER;
-  } else {
-    // Online mode: real CDN worker — faster parallel processing
-    window.pdfjsLib.GlobalWorkerOptions.workerSrc = PDFJS_WORKER_CDN;
-  }
-
+  if (pdfjs) return pdfjs;
+  // Load PDF.js from CDN
+  await new Promise((resolve, reject) => {
+    if (window.pdfjsLib) { resolve(); return; }
+    const s = document.createElement('script');
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.min.js';
+    s.onload = resolve;
+    s.onerror = reject;
+    document.head.appendChild(s);
+  });
+  window.pdfjsLib.GlobalWorkerOptions.workerSrc =
+    'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.worker.min.js';
   pdfjs = window.pdfjsLib;
   return pdfjs;
 }
-
-function toggleMode() {
-  const cb = document.getElementById('offlineToggle');
-  _offlineMode = cb ? cb.checked : !_offlineMode;
-  _modeJustSwitched = true;
-  pdfjs = null;
-
-  const label = document.getElementById('modeLabel');
-  const indicator = document.getElementById('modeIndicator');
-
-  if (_offlineMode) {
-    document.body.classList.add('offline-mode');
-    if (label) { label.textContent = '✈️ Offline'; label.style.color = '#34d399'; }
-    if (indicator) indicator.innerHTML = '✈️ <strong style="color:#34d399">Offline Mode</strong>';
-    try { localStorage.setItem('fs_mode', 'offline'); } catch(e){}
-  } else {
-    document.body.classList.remove('offline-mode');
-    if (label) { label.textContent = '🌐 Online'; label.style.color = '#34d399'; }
-    if (indicator) indicator.innerHTML = '🌐 <strong style="color:#34d399">Online Mode</strong>';
-    try { localStorage.setItem('fs_mode', 'online'); } catch(e){}
-  }
-}
-
-// Restore saved mode preference on load
-(function() {
-  try {
-    const saved = localStorage.getItem('fs_mode');
-    if (saved === 'offline') {
-      setTimeout(() => {
-        const cb = document.getElementById('offlineToggle');
-        if (cb && !cb.checked) { cb.checked = true; toggleMode(); }
-      }, 0);
-    }
-  } catch(e) {}
-})();
-
-async function extractPDFText
 
 async function extractPDFText(arrayBuffer) {
   const lib = await loadPDFJS();
@@ -964,17 +861,11 @@ function addLog(msg, type='active') {
 async function parseFile(file) {
   const ext = file.name.toLowerCase().split('.').pop();
   if (ext === 'pdf') {
-    try {
-      const buf = await file.arrayBuffer();
-      const text = await extractPDFText(buf);
-      if (!text || text.trim().length < 50) return { txns: [], cardHolder: '', balance: 0, warn: `${file.name}: scanned image PDF — no selectable text. Download as CSV from your bank instead.` };
-      const parsed = parseText(text, file.name);
-      if (!parsed.txns.length) return { txns: [], cardHolder: parsed.cardHolder, balance: parsed.balance, warn: `${file.name}: parsed OK but found 0 transactions. Try downloading as CSV.` };
-      return { txns: parsed.txns, cardHolder: parsed.cardHolder, balance: parsed.balance };
-    } catch(e) {
-      // PDF.js failed to load or parse — give a clear, actionable message
-      throw new Error(`Failed to read ${file.name}.\n\nMost likely cause: PDF library failed to load from CDN.\n\nFix: Download your statement as a CSV file from your bank website instead — CSV works without any external libraries and is 100% reliable.`);
-    }
+    const buf = await file.arrayBuffer();
+    const text = await extractPDFText(buf);
+    if (!text || text.trim().length < 50) return { txns: [], cardHolder: '', balance: 0, warn: 'scanned image PDF — no selectable text, download CSV instead' };
+    const parsed = parseText(text, file.name);
+    return { txns: parsed.txns, cardHolder: parsed.cardHolder, balance: parsed.balance };
   } else {
     return { txns: parseCSV(await file.text(), file.name), cardHolder: '', balance: 0 };
   }
@@ -1067,12 +958,7 @@ async function runAnalysis() {
   } catch(err) {
     document.getElementById('loadingState').style.display = 'none';
     document.getElementById('analyzeBtn').disabled = false;
-    // err might be an Event (script load failure), Error, or string — handle all
-    const msg = (err instanceof Error) ? err.message
-              : (typeof err === 'string') ? err
-              : (err && err.type) ? `Failed to load PDF library (${err.type}). Check your internet connection.`
-              : 'Unknown error during analysis.';
-    document.getElementById('errorBox').innerHTML = `<div class="error-box"><strong>⚠️ Analysis Failed</strong><br>${msg.replace(/\n/g,'<br>')}</div>`;
+    document.getElementById('errorBox').innerHTML = `<div class="error-box"><strong>⚠️ Analysis Failed</strong><br>${err.message.replace(/\n/g,'<br>')}</div>`;
   }
 }
 
@@ -1199,7 +1085,7 @@ function renderResults(d, historyIndex) {
 
     <div class="divider"><span>⬇️ Export</span></div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;padding-bottom:12px">
-      <button id="dlExcel" style="background:#059669;color:white;border:none;padding:10px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;">📊 Download CSV</button>
+      <button id="dlExcel" style="background:#059669;color:white;border:none;padding:10px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;">📊 Download Excel (.xlsx)</button>
       <button id="dlPDF" style="background:#2563eb;color:white;border:none;padding:10px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;">📄 Download Report (.html→PDF)</button>
     </div>`;
 
@@ -1329,73 +1215,6 @@ function renderHistory(history) {
 // ══════════════════════════════════════════════════════════
 // PDF DOWNLOAD (HTML report)
 // ══════════════════════════════════════════════════════════
-
-// ══════════════════════════════════════════════════════════
-// CSV DOWNLOAD — simple, no SheetJS dependency
-// ══════════════════════════════════════════════════════════
-function doDownloadCSV(d) {
-  const s = d.summary || {};
-  const subs = d.subscriptions || [];
-  const hidden = d.hiddenCharges || [];
-  const txns = d._transactions || [];
-
-  const rows = [];
-
-  // Summary
-  rows.push(['FinSentinel Report', '']);
-  rows.push(['Generated', new Date(d._generatedAt || Date.now()).toLocaleString()]);
-  rows.push(['Account Holder', s.cardHolder || '']);
-  rows.push(['Bank', s.bank || '']);
-  rows.push(['Total Spend', s.totalSpend || 0]);
-  rows.push(['Transactions', s.totalTransactions || 0]);
-  rows.push(['Potential Savings/yr', s.potentialSavings || 0]);
-  rows.push([]);
-
-  // Subscriptions
-  rows.push(['SUBSCRIPTIONS']);
-  rows.push(['Name', 'Amount/mo', 'Annual Cost', 'Risk', 'Recommendation', 'Cancel Phone', 'Cancel URL']);
-  for (const sub of subs) {
-    rows.push([sub.name, sub.amount, sub.annualCost, sub.risk, sub.recommendation, sub.cancelPhone || '', sub.cancelUrl || '']);
-  }
-  rows.push([]);
-
-  // Suspicious charges
-  rows.push(['SUSPICIOUS / DUPLICATE CHARGES']);
-  rows.push(['Description', 'Amount Each', 'Occurrences', 'Total', 'Reason', 'Action']);
-  for (const h of hidden) {
-    rows.push([h.description, h.amount, h.occurrences, h.totalCost, h.suspicionReason || '', h.action || '']);
-  }
-  rows.push([]);
-
-  // All transactions
-  rows.push(['ALL TRANSACTIONS']);
-  rows.push(['Date', 'Merchant', 'Amount', 'Credit']);
-  for (const t of txns) {
-    rows.push([t.date || '', t.merchant || '', t.amount || 0, t.credit ? 'Yes' : 'No']);
-  }
-
-  // Convert to CSV string
-  const csv = rows.map(row =>
-    row.map(cell => {
-      const val = String(cell ?? '');
-      return val.includes(',') || val.includes('"') || val.includes('\n')
-        ? `"${val.replace(/"/g, '""')}"` : val;
-    }).join(',')
-  ).join('\n');
-
-  // Download
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  const period = (d.monthlyTrend || [])[0]?.period?.replace(/\s/g, '-') || 'report';
-  a.download = `FinSentinel_${period}.csv`;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
-}
-
 function doDownloadPDF(d) {
   const s = d.summary||{};
   const trend = d.monthlyTrend||[];
@@ -1573,6 +1392,38 @@ ${(d._transactions||[]).length ? `
   if (data.analysisHistory?.length) renderHistory(data.analysisHistory);
 })();
 
+
+// ── OFFLINE / DARK MODE TOGGLE ────────────────────────────────────
+function toggleMode() {
+  const cb = document.getElementById('offlineToggle');
+  const offline = cb ? cb.checked : false;
+  const label = document.getElementById('modeLabel');
+  const indicator = document.getElementById('modeIndicator');
+
+  if (offline) {
+    document.body.classList.add('offline-mode');
+    if (label) { label.textContent = '✈️ Offline'; }
+    if (indicator) indicator.innerHTML = '✈️ <strong style="color:#34d399">Offline Mode</strong>';
+    try { localStorage.setItem('fs_mode', 'offline'); } catch(e) {}
+  } else {
+    document.body.classList.remove('offline-mode');
+    if (label) { label.textContent = '🌐 Online'; }
+    if (indicator) indicator.innerHTML = '🌐 <strong style="color:#34d399">Online Mode</strong>';
+    try { localStorage.setItem('fs_mode', 'online'); } catch(e) {}
+  }
+}
+
+// Restore saved mode on load
+(function() {
+  try {
+    if (localStorage.getItem('fs_mode') === 'offline') {
+      setTimeout(function() {
+        var cb = document.getElementById('offlineToggle');
+        if (cb) { cb.checked = true; toggleMode(); }
+      }, 0);
+    }
+  } catch(e) {}
+})();
 </script>
 </body>
 </html>
