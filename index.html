@@ -345,7 +345,7 @@ tr:hover td { background:var(--surface); }
 // ================================================================
 // 🔑 PASTE YOUR ANTHROPIC API KEY BELOW — keep the quotes
 // ================================================================
-const API_KEY = 'PASTE_YOUR_API_KEY_HERE';
+const API_KEY = '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';
 // ================================================================
 
 let uploadedFiles = [];
@@ -427,135 +427,103 @@ function showScreen(id) {
   document.getElementById('resultsArea').style.display = id==='resultsArea'?'block':'none';
 }
 
-// ── PROMPT TEMPLATE ──────────────────────────────────────────────
-function buildPrompt(opts, pass) {
-  // pass 1 = extract raw transactions as JSON array
-  // pass 2 = full analysis on the extracted data
-  if (pass === 1) return `
-You are a financial data extractor. Read ALL the credit card statements provided.
-Extract every single transaction and return ONLY a valid JSON object — no markdown, no backticks.
-Keep it compact. Use this exact structure:
-{
-  "cardHolder": "name",
-  "bank": "bank name",
-  "currentBalance": 0,
-  "transactions": [
-    { "date": "YYYY-MM-DD", "merchant": "string", "amount": 0, "credit": false }
-  ]
-}
-- credit: true means payment/refund (negative on statement), false means a purchase.
-- Include every transaction from every statement. No limit.
-- Amounts as positive numbers always. Use credit:true for payments/credits.`;
+// ════════════════════════════════════════════════════════════════
+//  CORE ENGINE — Sectioned multi-call. Each call = 1 small JSON.
+//  This architecture makes truncation physically impossible.
+// ════════════════════════════════════════════════════════════════
 
-  return `
-You are a personal financial AI security agent analyzing extracted credit card transaction data.
-Return ONLY valid JSON — no markdown, no backticks, no explanation.
-
-{
-  "summary":{ "cardHolder":"string","bank":"string","totalSpend":0,"months":0,"avgMonthly":0,"totalTransactions":0,"currentBalance":0,"potentialSavings":0 },
-  "monthlyTrend":[{ "period":"string","amount":0 }],
-  "categories":[{ "name":"string","amount":0,"count":0,"color":"#hex","pct":0 }],
-  "subscriptions":[{
-    "name":"string","amount":0,"frequency":"Monthly|Annual|Weekly",
-    "annualCost":0,"risk":"high|medium|low","reason":"string",
-    "recommendation":"Cancel|Keep|Review",
-    "cancelUrl":"website or phone","cancelSteps":["step 1","step 2","step 3"]
-  }],
-  "hiddenCharges":[{
-    "description":"string","amount":0,"occurrences":0,"totalCost":0,
-    "suspicionReason":"string","action":"string","disputeSteps":["step 1","step 2"]
-  }],
-  "spendingCoach":[{
-    "icon":"emoji","title":"string","observation":"string",
-    "annualCost":0,"alternative":"string","saving":0
-  }],
-  "creditScoreTips":[{
-    "factor":"string","impact":"high|medium|low","currentStatus":"string",
-    "action":"string","pointsGain":0
-  }],
-  "cashbackOpportunities":[{
-    "category":"string","currentSpend":0,"currentCard":"string",
-    "currentRate":0,"betterCard":"string","betterRate":0,
-    "annualGain":0,"applyUrl":"string"
-  }],
-  "billNegotiation":[{
-    "merchant":"string","currentAmount":0,"marketRate":0,
-    "overpaying":0,"script":"string","successRate":"string","bestTime":"string"
-  }],
-  "insights":[{ "icon":"emoji","title":"string","description":"string" }],
-  "topMerchants":[{ "name":"string","total":0,"count":0,"category":"string" }],
-  "actionPlan":[{
-    "priority":"high|medium|low","title":"string","description":"string",
-    "saving":"string","steps":["exact step with URL/phone","step 2","step 3"]
-  }],
-  "securityAlerts":[{
-    "severity":"critical|warning|info","title":"string",
-    "description":"string","action":"string"
-  }]
-}
-
-Analysis rules:
-${opts.subs?'- Find ALL recurring charges. Flag predatory/deceptive ones as high risk. Include cancelUrl and cancelSteps.':''}
-${opts.hidden?'- Hidden charges: fake USPS ($37.75 charges), duplicate billing, mystery international merchants, charges where merchant name differs from actual company. Include disputeSteps and suspicionReason.':''}
-${opts.cats?'- Categories with colors: Food=#f59e0b, Transport=#06b6d4, Groceries=#84cc16, Shopping=#8b5cf6, Education=#10b981, Entertainment=#ec4899, Subscriptions=#6366f1, Utilities=#64748b, Healthcare=#0ea5e9, Travel=#f97316, Other=#94a3b8':''}
-${opts.merchants?'- Top 12 merchants by total spend.':''}
-${opts.insights?'- 5 sharp insights with specific dollar amounts from the data.':''}
-${opts.trends?'- Monthly trend grouping transactions by statement period.':''}
-${opts.action?'- 6-8 action plan items ordered high→low priority. Exact steps with URLs/phone/app navigation.':''}
-- spendingCoach: identify top 5 areas where user spends excessively vs cheaper alternatives.
-- creditScoreTips: analyze utilization, payment patterns, and give 3-5 specific score improvement tips.
-- cashbackOpportunities: compare current spending categories against better credit card offers.
-- billNegotiation: find recurring bills (utilities, insurance, internet, phone) user could negotiate down. Include exact word-for-word negotiation script.
-- securityAlerts: flag anything suspicious — new merchant types, geographic anomalies, charge pattern changes, potential fraud signals.
-- potentialSavings = total annual savings from all Cancel subscriptions.`;
-}
-
-// ── SAFE JSON PARSER ─────────────────────────────────────────────
-function safeParseJSON(raw) {
-  // Remove markdown fences
-  let clean = raw.replace(/```json\s*/gi,'').replace(/```\s*/g,'').trim();
-
-  // Try direct parse first
-  try { return JSON.parse(clean); } catch(e) {}
-
-  // Find the outermost { ... } block
-  const start = clean.indexOf('{');
-  const end = clean.lastIndexOf('}');
-  if (start !== -1 && end !== -1) {
-    try { return JSON.parse(clean.slice(start, end+1)); } catch(e) {}
-  }
-
-  // JSON is truncated — attempt to auto-close it
-  try {
-    let partial = start !== -1 ? clean.slice(start) : clean;
-    // Count unclosed brackets
-    let opens = 0, aopens = 0;
-    for (const ch of partial) {
-      if (ch==='{') opens++; else if (ch==='}') opens--;
-      if (ch==='[') aopens++; else if (ch===']') aopens--;
-    }
-    // Strip trailing incomplete key/value
-    partial = partial.replace(/,\s*"[^"]*"\s*:\s*[^,}\]]*$/, '');
-    partial = partial.replace(/,\s*"[^"]*"\s*$/, '');
-    partial = partial.replace(/,\s*$/, '');
-    // Close open arrays then objects
-    for (let i=0;i<aopens;i++) partial += ']';
-    for (let i=0;i<opens;i++) partial += '}';
-    return JSON.parse(partial);
-  } catch(e) {
-    throw new Error('AI response was too large and could not be repaired. Try uploading fewer files at once (max 20 recommended).');
-  }
-}
-
-// ── UPDATE PROGRESS LABEL ────────────────────────────────────────
 function setProgress(msg) {
   document.getElementById('loadingTitle').textContent = msg;
+}
+
+// Single focused API call — returns parsed JSON or {}
+async function apiCall(prompt, maxTok = 4000) {
+  const r = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': API_KEY,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true'
+    },
+    body: JSON.stringify({
+      model: 'claude-haiku-4-5-20251001',  // Haiku for speed+cost on focused tasks
+      max_tokens: maxTok,
+      messages: [{ role: 'user', content: prompt }]
+    })
+  });
+  if (!r.ok) { const e = await r.json(); throw new Error(e.error?.message || `API error ${r.status}`); }
+  const d = await r.json();
+  const raw = d.content.map(c => c.text || '').join('');
+  const clean = raw.replace(/```json\s*/gi, '').replace(/```\s*/g, '').trim();
+  try { return JSON.parse(clean); } catch {
+    const s = clean.indexOf('{'), e2 = clean.lastIndexOf('}');
+    if (s !== -1 && e2 !== -1) { try { return JSON.parse(clean.slice(s, e2 + 1)); } catch {} }
+    return {};
+  }
+}
+
+// Extract transactions from PDFs using Sonnet (needs vision)
+async function extractBatch(files) {
+  const content = [];
+  for (const file of files) {
+    const ext = file.name.toLowerCase().split('.').pop();
+    if (ext === 'pdf') {
+      content.push({ type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: await readB64(file) } });
+      content.push({ type: 'text', text: `[File: ${file.name}]` });
+    } else {
+      content.push({ type: 'text', text: `\n--- ${file.name} ---\n${(await readText(file)).substring(0, 12000)}\n` });
+    }
+  }
+  content.push({ type: 'text', text: `Extract ALL transactions. Return ONLY compact JSON, no markdown:
+{"cardHolder":"name","bank":"bank","currentBalance":0,"transactions":[{"date":"YYYY-MM-DD","merchant":"name","amount":0,"credit":false}]}
+credit=true for payments/refunds. Amounts always positive. Include every transaction.` });
+
+  const r = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'x-api-key': API_KEY, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
+    body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 16000, messages: [{ role: 'user', content }] })
+  });
+  if (!r.ok) { const e = await r.json(); throw new Error(e.error?.message || `API error ${r.status}`); }
+  const d = await r.json();
+  const raw = d.content.map(c => c.text || '').join('');
+  const clean = raw.replace(/```json\s*/gi, '').replace(/```\s*/g, '').trim();
+  try { return JSON.parse(clean); } catch {
+    const s = clean.indexOf('{'), e2 = clean.lastIndexOf('}');
+    if (s !== -1 && e2 !== -1) { try { return JSON.parse(clean.slice(s, e2 + 1)); } catch {} }
+    return { transactions: [] };
+  }
+}
+
+// Build the shared context string (compact transaction list)
+function buildContext(txns, cardHolder, bank, balance) {
+  const purchases = txns.filter(t => !t.credit);
+  const totalSpend = purchases.reduce((a, t) => a + t.amount, 0);
+  // Aggregate by merchant for context efficiency
+  const byMerchant = {};
+  purchases.forEach(t => {
+    const k = t.merchant;
+    byMerchant[k] = byMerchant[k] || { count: 0, total: 0, dates: [] };
+    byMerchant[k].count++;
+    byMerchant[k].total += t.amount;
+    byMerchant[k].dates.push(t.date);
+  });
+  const merchantSummary = Object.entries(byMerchant)
+    .sort((a, b) => b[1].total - a[1].total)
+    .slice(0, 80)
+    .map(([name, v]) => `${name}:count=${v.count},total=$${v.total.toFixed(0)},dates=${v.dates.slice(0,3).join('|')}`)
+    .join('\n');
+
+  return `CARD: ${cardHolder} | ${bank} | Balance: $${balance} | ${txns.length} transactions | Total spend: $${totalSpend.toFixed(0)}
+TOP MERCHANTS:\n${merchantSummary}
+RECENT TRANSACTIONS (last 30):\n${purchases.slice(-30).map(t => `${t.date} | ${t.merchant} | $${t.amount}`).join('\n')}`;
 }
 
 // ── MAIN ANALYSIS ────────────────────────────────────────────────
 async function runAnalysis() {
   if (!uploadedFiles.length) return;
-  showScreen('loadingScreen'); startLoading();
+  showScreen('loadingScreen');
+  startLoading();
 
   const opts = {
     subs: document.getElementById('opt-subs').checked,
@@ -568,93 +536,132 @@ async function runAnalysis() {
   };
 
   try {
-    // ── PASS 1: Extract all transactions ──────────────────────────
-    setProgress(`Reading ${uploadedFiles.length} statements — extracting transactions...`);
-
-    // Process in batches of 10 files max per API call
-    const BATCH = 10;
-    let allTransactions = [];
-    let cardHolder = '', bank = '', currentBalance = 0;
+    // ══ PASS 1: Extract transactions in batches of 8 ══════════════
+    const BATCH = 8;
+    let allTxns = [], cardHolder = '', bank = '', balance = 0;
+    const totalBatches = Math.ceil(uploadedFiles.length / BATCH);
 
     for (let b = 0; b < uploadedFiles.length; b += BATCH) {
       const batch = uploadedFiles.slice(b, b + BATCH);
-      const batchNum = Math.floor(b/BATCH)+1;
-      const totalBatches = Math.ceil(uploadedFiles.length/BATCH);
-      setProgress(`Reading batch ${batchNum} of ${totalBatches} (${batch.length} files)...`);
-
-      const content = [];
-      for (const file of batch) {
-        const ext = file.name.toLowerCase().split('.').pop();
-        if (ext === 'pdf') {
-          content.push({ type:'document', source:{ type:'base64', media_type:'application/pdf', data: await readB64(file) } });
-          content.push({ type:'text', text:`[File: ${file.name}]` });
-        } else {
-          content.push({ type:'text', text:`\n--- FILE: ${file.name} ---\n${(await readText(file)).substring(0,12000)}\n---\n` });
-        }
-      }
-      content.push({ type:'text', text: buildPrompt(opts, 1) });
-
-      const r = await fetch('https://api.anthropic.com/v1/messages', {
-        method:'POST',
-        headers:{ 'Content-Type':'application/json','x-api-key':API_KEY,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true' },
-        body: JSON.stringify({ model:'claude-sonnet-4-6', max_tokens:16000, messages:[{ role:'user', content }] })
-      });
-      if (!r.ok) { const e=await r.json(); throw new Error(e.error?.message||`API error ${r.status}`); }
-
-      const d = await r.json();
-      const raw = d.content.map(c=>c.text||'').join('');
-      const extracted = safeParseJSON(raw);
-
-      if (extracted.transactions) allTransactions = allTransactions.concat(extracted.transactions);
-      if (!cardHolder && extracted.cardHolder) cardHolder = extracted.cardHolder;
-      if (!bank && extracted.bank) bank = extracted.bank;
-      if (extracted.currentBalance) currentBalance = extracted.currentBalance;
+      setProgress(`📄 Reading files ${b + 1}–${Math.min(b + BATCH, uploadedFiles.length)} of ${uploadedFiles.length}...`);
+      const result = await extractBatch(batch);
+      if (result.transactions) allTxns = allTxns.concat(result.transactions);
+      if (!cardHolder && result.cardHolder) cardHolder = result.cardHolder;
+      if (!bank && result.bank) bank = result.bank;
+      if (result.currentBalance) balance = result.currentBalance;
     }
 
-    // ── PASS 2: Full analysis on extracted data ───────────────────
-    setProgress('Running full AI analysis on all transactions...');
+    const ctx = buildContext(allTxns, cardHolder, bank, balance);
+    const result = {};
 
-    const analysisContent = [{
-      type:'text',
-      text: `Here are ALL extracted transactions from ${uploadedFiles.length} credit card statements for ${cardHolder} at ${bank}. Current balance: $${currentBalance}. Total transactions: ${allTransactions.length}.\n\nTRANSACTIONS:\n${JSON.stringify(allTransactions)}\n\n${buildPrompt(opts, 2)}`
-    }];
+    // ══ PASS 2: Run 6 focused analysis calls in parallel ══════════
+    // Each returns a tiny JSON — impossible to truncate.
 
-    const resp2 = await fetch('https://api.anthropic.com/v1/messages', {
-      method:'POST',
-      headers:{ 'Content-Type':'application/json','x-api-key':API_KEY,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true' },
-      body: JSON.stringify({ model:'claude-sonnet-4-6', max_tokens:16000, messages:[{ role:'user', content: analysisContent }] })
-    });
-    if (!resp2.ok) { const e=await resp2.json(); throw new Error(e.error?.message||`API error ${resp2.status}`); }
+    setProgress('🔍 Analyzing subscriptions & hidden charges...');
+    const [r1, r2] = await Promise.all([
 
-    const data2 = await resp2.json();
-    const raw2 = data2.content.map(c=>c.text||'').join('');
-    const parsed = safeParseJSON(raw2);
+      // SECTION A: Summary + subscriptions + hidden charges
+      apiCall(`You are a financial security AI. Analyze this data and return ONLY JSON, no markdown.
+${ctx}
+Return exactly:
+{"summary":{"cardHolder":"${cardHolder}","bank":"${bank}","totalSpend":0,"months":0,"avgMonthly":0,"totalTransactions":${allTxns.length},"currentBalance":${balance},"potentialSavings":0},
+"subscriptions":[{"name":"str","amount":0,"frequency":"Monthly","annualCost":0,"risk":"high|medium|low","reason":"str","recommendation":"Cancel|Keep|Review","cancelUrl":"str","cancelSteps":["step1","step2"]}],
+"hiddenCharges":[{"description":"str","amount":0,"occurrences":0,"totalCost":0,"suspicionReason":"str","action":"str","disputeSteps":["step1","step2"]}],
+"securityAlerts":[{"severity":"critical|warning|info","title":"str","description":"str","action":"str"}]}
+Rules: Find ALL recurring charges as subscriptions. Flag SmartyPlus, fake USPS ($37.75), duplicate charges, mystery international merchants. potentialSavings=sum of annualCost for Cancel subs.`, 6000),
 
-    // Inject raw transaction list for chat context
-    parsed._transactions = allTransactions;
-    analysisData = parsed;
+      // SECTION B: Categories + monthly trend + top merchants
+      apiCall(`You are a financial analytics AI. Analyze this data and return ONLY JSON, no markdown.
+${ctx}
+Return exactly:
+{"categories":[{"name":"str","amount":0,"count":0,"color":"#hex","pct":0}],
+"monthlyTrend":[{"period":"str","amount":0}],
+"topMerchants":[{"name":"str","total":0,"count":0,"category":"str"}]}
+Category colors: Food=#f59e0b,Transport=#06b6d4,Groceries=#84cc16,Shopping=#8b5cf6,Education=#10b981,Entertainment=#ec4899,Subscriptions=#6366f1,Utilities=#64748b,Healthcare=#0ea5e9,Travel=#f97316,Other=#94a3b8
+Include top 12 merchants. Group transactions by month for trend.`, 3000)
+    ]);
+
+    setProgress('💡 Building insights, coaching & action plan...');
+    const [r3, r4, r5] = await Promise.all([
+
+      // SECTION C: Spending coach + credit score tips
+      apiCall(`You are a financial coach AI. Analyze this data and return ONLY JSON, no markdown.
+${ctx}
+Return exactly:
+{"spendingCoach":[{"icon":"emoji","title":"str","observation":"str","annualCost":0,"alternative":"str","saving":0}],
+"creditScoreTips":[{"factor":"str","impact":"high|medium|low","currentStatus":"str","action":"str","pointsGain":0}]}
+spendingCoach: top 5 overspending areas with cheaper alternatives. Be specific with dollar amounts.
+creditScoreTips: analyze utilization, payment patterns, give 3-5 score improvement tips with estimated point gains.`, 3000),
+
+      // SECTION D: Cashback + bill negotiation
+      apiCall(`You are a financial optimization AI. Analyze this data and return ONLY JSON, no markdown.
+${ctx}
+Return exactly:
+{"cashbackOpportunities":[{"category":"str","currentSpend":0,"currentCard":"str","currentRate":0,"betterCard":"str","betterRate":0,"annualGain":0}],
+"billNegotiation":[{"merchant":"str","currentAmount":0,"marketRate":0,"overpaying":0,"script":"str","successRate":"str","bestTime":"str"}]}
+cashbackOpportunities: compare spending categories against better credit card offers. Show realistic gains.
+billNegotiation: find utilities, insurance, internet, phone bills to negotiate. Include word-for-word script.`, 3000),
+
+      // SECTION E: Insights + action plan
+      apiCall(`You are a financial advisor AI. Analyze this data and return ONLY JSON, no markdown.
+${ctx}
+Return exactly:
+{"insights":[{"icon":"emoji","title":"str","description":"str"}],
+"actionPlan":[{"priority":"high|medium|low","title":"str","description":"str","saving":"str","steps":["exact step with URL/phone","step2","step3"]}]}
+insights: 5 sharp observations with specific dollar amounts from the data.
+actionPlan: 6-8 actions ordered high→low priority. Each step must be exact and actionable with URLs/phone numbers.`, 3000)
+    ]);
+
+    // ══ MERGE all sections into one result object ══════════════════
+    const merged = {
+      summary: r1.summary || {},
+      subscriptions: r1.subscriptions || [],
+      hiddenCharges: r1.hiddenCharges || [],
+      securityAlerts: r1.securityAlerts || [],
+      categories: r2.categories || [],
+      monthlyTrend: r2.monthlyTrend || [],
+      topMerchants: r2.topMerchants || [],
+      spendingCoach: r3.spendingCoach || [],
+      creditScoreTips: r3.creditScoreTips || [],
+      cashbackOpportunities: r4.cashbackOpportunities || [],
+      billNegotiation: r4.billNegotiation || [],
+      insights: r5.insights || [],
+      actionPlan: r5.actionPlan || [],
+      _transactions: allTxns
+    };
+
+    // Ensure summary has key values even if AI missed them
+    if (!merged.summary.totalSpend) {
+      merged.summary.totalSpend = allTxns.filter(t=>!t.credit).reduce((a,t)=>a+t.amount,0);
+    }
+    if (!merged.summary.totalTransactions) merged.summary.totalTransactions = allTxns.length;
+    if (!merged.summary.cardHolder) merged.summary.cardHolder = cardHolder;
+    if (!merged.summary.bank) merged.summary.bank = bank;
+    if (!merged.summary.currentBalance) merged.summary.currentBalance = balance;
+
+    analysisData = merged;
 
     chatHistory = [
-      { role:'user', content:`I analyzed ${uploadedFiles.length} credit card statements with ${allTransactions.length} transactions. Summary: ${JSON.stringify(parsed.summary)}. Subscriptions: ${JSON.stringify(parsed.subscriptions?.slice(0,10))}. Hidden charges: ${JSON.stringify(parsed.hiddenCharges)}. Security alerts: ${JSON.stringify(parsed.securityAlerts)}. Action plan: ${JSON.stringify(parsed.actionPlan)}.` },
-      { role:'assistant', content:`Analysis complete across ${uploadedFiles.length} statements. Found ${parsed.subscriptions?.length||0} subscriptions, ${parsed.hiddenCharges?.length||0} suspicious charges, ${parsed.securityAlerts?.length||0} security alerts, and ${parsed.cashbackOpportunities?.length||0} cashback opportunities. Ask me anything!` }
+      { role: 'user', content: `Analyzed ${uploadedFiles.length} statements, ${allTxns.length} transactions. Subscriptions: ${JSON.stringify(merged.subscriptions?.slice(0,8))}. Hidden: ${JSON.stringify(merged.hiddenCharges)}. Security: ${JSON.stringify(merged.securityAlerts)}. Action plan: ${JSON.stringify(merged.actionPlan)}.` },
+      { role: 'assistant', content: `Analysis complete. Found ${merged.subscriptions?.length||0} subscriptions, ${merged.hiddenCharges?.length||0} suspicious charges, ${merged.securityAlerts?.length||0} security alerts. Ask me anything!` }
     ];
 
     loadTimers.forEach(clearTimeout);
     showScreen('resultsArea');
     document.getElementById('resultsArea').style.display = 'block';
-    renderResults(parsed);
+    renderResults(merged);
     document.getElementById('chatToggleBtn').disabled = false;
 
-  } catch(err) {
+  } catch (err) {
     loadTimers.forEach(clearTimeout);
     showScreen('resultsArea');
     document.getElementById('resultsArea').style.display = 'block';
     document.getElementById('resultsContent').innerHTML = `
       <div class="error-box">
-        <strong>⚠️ Error</strong><br><br>${err.message}<br><br>
+        <strong>⚠️ Error: ${err.message}</strong><br><br>
         <span style="font-size:12px">
-          • PDF files must have selectable text (not scanned images)<br>
-          • If you have 35+ files, try uploading in two separate runs of ~17 files each<br>
+          • PDF files must have selectable text — not scanned images<br>
+          • Check that your API key is correct (starts with sk-ant-)<br>
           • Check your internet connection and try again
         </span>
       </div>`;
