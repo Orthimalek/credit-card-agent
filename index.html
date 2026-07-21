@@ -345,7 +345,7 @@ tr:hover td { background:var(--surface); }
 // ================================================================
 // 🔑 PASTE YOUR ANTHROPIC API KEY BELOW — keep the quotes
 // ================================================================
-const API_KEY = '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';
+const API_KEY = 'PASTE_YOUR_API_KEY_HERE';
 // ================================================================
 
 let uploadedFiles = [];
@@ -427,7 +427,132 @@ function showScreen(id) {
   document.getElementById('resultsArea').style.display = id==='resultsArea'?'block':'none';
 }
 
-// ANALYSIS
+// ── PROMPT TEMPLATE ──────────────────────────────────────────────
+function buildPrompt(opts, pass) {
+  // pass 1 = extract raw transactions as JSON array
+  // pass 2 = full analysis on the extracted data
+  if (pass === 1) return `
+You are a financial data extractor. Read ALL the credit card statements provided.
+Extract every single transaction and return ONLY a valid JSON object — no markdown, no backticks.
+Keep it compact. Use this exact structure:
+{
+  "cardHolder": "name",
+  "bank": "bank name",
+  "currentBalance": 0,
+  "transactions": [
+    { "date": "YYYY-MM-DD", "merchant": "string", "amount": 0, "credit": false }
+  ]
+}
+- credit: true means payment/refund (negative on statement), false means a purchase.
+- Include every transaction from every statement. No limit.
+- Amounts as positive numbers always. Use credit:true for payments/credits.`;
+
+  return `
+You are a personal financial AI security agent analyzing extracted credit card transaction data.
+Return ONLY valid JSON — no markdown, no backticks, no explanation.
+
+{
+  "summary":{ "cardHolder":"string","bank":"string","totalSpend":0,"months":0,"avgMonthly":0,"totalTransactions":0,"currentBalance":0,"potentialSavings":0 },
+  "monthlyTrend":[{ "period":"string","amount":0 }],
+  "categories":[{ "name":"string","amount":0,"count":0,"color":"#hex","pct":0 }],
+  "subscriptions":[{
+    "name":"string","amount":0,"frequency":"Monthly|Annual|Weekly",
+    "annualCost":0,"risk":"high|medium|low","reason":"string",
+    "recommendation":"Cancel|Keep|Review",
+    "cancelUrl":"website or phone","cancelSteps":["step 1","step 2","step 3"]
+  }],
+  "hiddenCharges":[{
+    "description":"string","amount":0,"occurrences":0,"totalCost":0,
+    "suspicionReason":"string","action":"string","disputeSteps":["step 1","step 2"]
+  }],
+  "spendingCoach":[{
+    "icon":"emoji","title":"string","observation":"string",
+    "annualCost":0,"alternative":"string","saving":0
+  }],
+  "creditScoreTips":[{
+    "factor":"string","impact":"high|medium|low","currentStatus":"string",
+    "action":"string","pointsGain":0
+  }],
+  "cashbackOpportunities":[{
+    "category":"string","currentSpend":0,"currentCard":"string",
+    "currentRate":0,"betterCard":"string","betterRate":0,
+    "annualGain":0,"applyUrl":"string"
+  }],
+  "billNegotiation":[{
+    "merchant":"string","currentAmount":0,"marketRate":0,
+    "overpaying":0,"script":"string","successRate":"string","bestTime":"string"
+  }],
+  "insights":[{ "icon":"emoji","title":"string","description":"string" }],
+  "topMerchants":[{ "name":"string","total":0,"count":0,"category":"string" }],
+  "actionPlan":[{
+    "priority":"high|medium|low","title":"string","description":"string",
+    "saving":"string","steps":["exact step with URL/phone","step 2","step 3"]
+  }],
+  "securityAlerts":[{
+    "severity":"critical|warning|info","title":"string",
+    "description":"string","action":"string"
+  }]
+}
+
+Analysis rules:
+${opts.subs?'- Find ALL recurring charges. Flag predatory/deceptive ones as high risk. Include cancelUrl and cancelSteps.':''}
+${opts.hidden?'- Hidden charges: fake USPS ($37.75 charges), duplicate billing, mystery international merchants, charges where merchant name differs from actual company. Include disputeSteps and suspicionReason.':''}
+${opts.cats?'- Categories with colors: Food=#f59e0b, Transport=#06b6d4, Groceries=#84cc16, Shopping=#8b5cf6, Education=#10b981, Entertainment=#ec4899, Subscriptions=#6366f1, Utilities=#64748b, Healthcare=#0ea5e9, Travel=#f97316, Other=#94a3b8':''}
+${opts.merchants?'- Top 12 merchants by total spend.':''}
+${opts.insights?'- 5 sharp insights with specific dollar amounts from the data.':''}
+${opts.trends?'- Monthly trend grouping transactions by statement period.':''}
+${opts.action?'- 6-8 action plan items ordered high→low priority. Exact steps with URLs/phone/app navigation.':''}
+- spendingCoach: identify top 5 areas where user spends excessively vs cheaper alternatives.
+- creditScoreTips: analyze utilization, payment patterns, and give 3-5 specific score improvement tips.
+- cashbackOpportunities: compare current spending categories against better credit card offers.
+- billNegotiation: find recurring bills (utilities, insurance, internet, phone) user could negotiate down. Include exact word-for-word negotiation script.
+- securityAlerts: flag anything suspicious — new merchant types, geographic anomalies, charge pattern changes, potential fraud signals.
+- potentialSavings = total annual savings from all Cancel subscriptions.`;
+}
+
+// ── SAFE JSON PARSER ─────────────────────────────────────────────
+function safeParseJSON(raw) {
+  // Remove markdown fences
+  let clean = raw.replace(/```json\s*/gi,'').replace(/```\s*/g,'').trim();
+
+  // Try direct parse first
+  try { return JSON.parse(clean); } catch(e) {}
+
+  // Find the outermost { ... } block
+  const start = clean.indexOf('{');
+  const end = clean.lastIndexOf('}');
+  if (start !== -1 && end !== -1) {
+    try { return JSON.parse(clean.slice(start, end+1)); } catch(e) {}
+  }
+
+  // JSON is truncated — attempt to auto-close it
+  try {
+    let partial = start !== -1 ? clean.slice(start) : clean;
+    // Count unclosed brackets
+    let opens = 0, aopens = 0;
+    for (const ch of partial) {
+      if (ch==='{') opens++; else if (ch==='}') opens--;
+      if (ch==='[') aopens++; else if (ch===']') aopens--;
+    }
+    // Strip trailing incomplete key/value
+    partial = partial.replace(/,\s*"[^"]*"\s*:\s*[^,}\]]*$/, '');
+    partial = partial.replace(/,\s*"[^"]*"\s*$/, '');
+    partial = partial.replace(/,\s*$/, '');
+    // Close open arrays then objects
+    for (let i=0;i<aopens;i++) partial += ']';
+    for (let i=0;i<opens;i++) partial += '}';
+    return JSON.parse(partial);
+  } catch(e) {
+    throw new Error('AI response was too large and could not be repaired. Try uploading fewer files at once (max 20 recommended).');
+  }
+}
+
+// ── UPDATE PROGRESS LABEL ────────────────────────────────────────
+function setProgress(msg) {
+  document.getElementById('loadingTitle').textContent = msg;
+}
+
+// ── MAIN ANALYSIS ────────────────────────────────────────────────
 async function runAnalysis() {
   if (!uploadedFiles.length) return;
   showScreen('loadingScreen'); startLoading();
@@ -443,61 +568,75 @@ async function runAnalysis() {
   };
 
   try {
-    const content = [];
-    for (const file of uploadedFiles) {
-      const ext = file.name.toLowerCase().split('.').pop();
-      if (ext === 'pdf') {
-        content.push({ type:'document', source:{ type:'base64', media_type:'application/pdf', data: await readB64(file) } });
-        content.push({ type:'text', text:`[File: ${file.name}]` });
-      } else {
-        content.push({ type:'text', text:`\n--- FILE: ${file.name} ---\n${(await readText(file)).substring(0,15000)}\n---\n` });
+    // ── PASS 1: Extract all transactions ──────────────────────────
+    setProgress(`Reading ${uploadedFiles.length} statements — extracting transactions...`);
+
+    // Process in batches of 10 files max per API call
+    const BATCH = 10;
+    let allTransactions = [];
+    let cardHolder = '', bank = '', currentBalance = 0;
+
+    for (let b = 0; b < uploadedFiles.length; b += BATCH) {
+      const batch = uploadedFiles.slice(b, b + BATCH);
+      const batchNum = Math.floor(b/BATCH)+1;
+      const totalBatches = Math.ceil(uploadedFiles.length/BATCH);
+      setProgress(`Reading batch ${batchNum} of ${totalBatches} (${batch.length} files)...`);
+
+      const content = [];
+      for (const file of batch) {
+        const ext = file.name.toLowerCase().split('.').pop();
+        if (ext === 'pdf') {
+          content.push({ type:'document', source:{ type:'base64', media_type:'application/pdf', data: await readB64(file) } });
+          content.push({ type:'text', text:`[File: ${file.name}]` });
+        } else {
+          content.push({ type:'text', text:`\n--- FILE: ${file.name} ---\n${(await readText(file)).substring(0,12000)}\n---\n` });
+        }
       }
+      content.push({ type:'text', text: buildPrompt(opts, 1) });
+
+      const r = await fetch('https://api.anthropic.com/v1/messages', {
+        method:'POST',
+        headers:{ 'Content-Type':'application/json','x-api-key':API_KEY,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true' },
+        body: JSON.stringify({ model:'claude-sonnet-4-6', max_tokens:16000, messages:[{ role:'user', content }] })
+      });
+      if (!r.ok) { const e=await r.json(); throw new Error(e.error?.message||`API error ${r.status}`); }
+
+      const d = await r.json();
+      const raw = d.content.map(c=>c.text||'').join('');
+      const extracted = safeParseJSON(raw);
+
+      if (extracted.transactions) allTransactions = allTransactions.concat(extracted.transactions);
+      if (!cardHolder && extracted.cardHolder) cardHolder = extracted.cardHolder;
+      if (!bank && extracted.bank) bank = extracted.bank;
+      if (extracted.currentBalance) currentBalance = extracted.currentBalance;
     }
 
-    content.push({ type:'text', text:`
-You are a personal financial AI agent. Analyze ALL credit card statements provided.
-Return ONLY valid JSON — no markdown, no backticks, no extra text. Structure:
-{
-  "summary":{ "cardHolder":"string","bank":"string","totalSpend":0,"months":0,"avgMonthly":0,"totalTransactions":0,"currentBalance":0,"potentialSavings":0 },
-  "monthlyTrend":[{ "period":"string","amount":0 }],
-  "categories":[{ "name":"string","amount":0,"count":0,"color":"#hex","pct":0 }],
-  "subscriptions":[{ "name":"string","amount":0,"frequency":"Monthly|Annual","annualCost":0,"risk":"high|medium|low","reason":"string","recommendation":"Cancel|Keep|Review","cancelUrl":"string","cancelSteps":["step 1","step 2","step 3"] }],
-  "hiddenCharges":[{ "description":"string","amount":0,"occurrences":0,"totalCost":0,"action":"string","disputeSteps":["step 1","step 2"] }],
-  "insights":[{ "icon":"emoji","title":"string","description":"string" }],
-  "topMerchants":[{ "name":"string","total":0,"count":0,"category":"string" }],
-  "recentTransactions":[{ "date":"YYYY-MM-DD","merchant":"string","amount":0,"category":"string" }],
-  "actionPlan":[{ "priority":"high|medium|low","title":"string","description":"string","saving":"string","steps":["exact step with URL/phone","step 2","step 3"] }]
-}
-Requirements:
-${opts.subs?'- Find ALL recurring charges. Flag predatory ones. Include exact cancelUrl and cancelSteps for each.':''}
-${opts.hidden?'- Find hidden charges: scam sites, duplicate charges, mystery merchants. Include disputeSteps.':''}
-${opts.cats?'- Categories: Food & Dining, Transportation, Groceries, Shopping, Education, Entertainment, Subscriptions, Utilities, Healthcare, Travel, Other.':''}
-${opts.merchants?'- Top 12 merchants by spend.':''}
-${opts.insights?'- 5-7 specific insights with real numbers from the data.':''}
-${opts.trends?'- Monthly trend for every statement period.':''}
-${opts.action?'- 6-8 action plan items by priority. Each must have title, description, saving estimate, and 2-4 exact steps with URLs/phone numbers/app paths.':''}
-- potentialSavings = sum of annualCost for Cancel subscriptions.
-- Flag SmartyPlus, fake USPS, duplicate Adobe, unexplained international charges.
-- Include up to 30 recent transactions.` });
+    // ── PASS 2: Full analysis on extracted data ───────────────────
+    setProgress('Running full AI analysis on all transactions...');
 
-    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+    const analysisContent = [{
+      type:'text',
+      text: `Here are ALL extracted transactions from ${uploadedFiles.length} credit card statements for ${cardHolder} at ${bank}. Current balance: $${currentBalance}. Total transactions: ${allTransactions.length}.\n\nTRANSACTIONS:\n${JSON.stringify(allTransactions)}\n\n${buildPrompt(opts, 2)}`
+    }];
+
+    const resp2 = await fetch('https://api.anthropic.com/v1/messages', {
       method:'POST',
       headers:{ 'Content-Type':'application/json','x-api-key':API_KEY,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true' },
-      body: JSON.stringify({ model:'claude-sonnet-4-6', max_tokens:7000, messages:[{ role:'user', content }] })
+      body: JSON.stringify({ model:'claude-sonnet-4-6', max_tokens:16000, messages:[{ role:'user', content: analysisContent }] })
     });
+    if (!resp2.ok) { const e=await resp2.json(); throw new Error(e.error?.message||`API error ${resp2.status}`); }
 
-    if (!resp.ok) { const e=await resp.json(); throw new Error(e.error?.message||`API error ${resp.status}`); }
+    const data2 = await resp2.json();
+    const raw2 = data2.content.map(c=>c.text||'').join('');
+    const parsed = safeParseJSON(raw2);
 
-    const data = await resp.json();
-    const raw = data.content.map(c=>c.text||'').join('');
-    let parsed;
-    try { parsed=JSON.parse(raw.replace(/```json|```/g,'').trim()); }
-    catch { const m=raw.match(/\{[\s\S]*\}/); if(m) parsed=JSON.parse(m[0]); else throw new Error('Could not parse AI response. Please try again.'); }
-
+    // Inject raw transaction list for chat context
+    parsed._transactions = allTransactions;
     analysisData = parsed;
+
     chatHistory = [
-      { role:'user', content:`I analyzed my credit card statements. Summary: ${JSON.stringify(parsed.summary)}. Subscriptions: ${JSON.stringify(parsed.subscriptions)}. Hidden: ${JSON.stringify(parsed.hiddenCharges)}. Merchants: ${JSON.stringify(parsed.topMerchants)}. Action plan: ${JSON.stringify(parsed.actionPlan)}.` },
-      { role:'assistant', content:`Analysis complete. Found ${parsed.subscriptions?.length||0} subscriptions and $${parsed.summary?.potentialSavings||0} in potential annual savings. Ask me anything!` }
+      { role:'user', content:`I analyzed ${uploadedFiles.length} credit card statements with ${allTransactions.length} transactions. Summary: ${JSON.stringify(parsed.summary)}. Subscriptions: ${JSON.stringify(parsed.subscriptions?.slice(0,10))}. Hidden charges: ${JSON.stringify(parsed.hiddenCharges)}. Security alerts: ${JSON.stringify(parsed.securityAlerts)}. Action plan: ${JSON.stringify(parsed.actionPlan)}.` },
+      { role:'assistant', content:`Analysis complete across ${uploadedFiles.length} statements. Found ${parsed.subscriptions?.length||0} subscriptions, ${parsed.hiddenCharges?.length||0} suspicious charges, ${parsed.securityAlerts?.length||0} security alerts, and ${parsed.cashbackOpportunities?.length||0} cashback opportunities. Ask me anything!` }
     ];
 
     loadTimers.forEach(clearTimeout);
@@ -510,7 +649,15 @@ ${opts.action?'- 6-8 action plan items by priority. Each must have title, descri
     loadTimers.forEach(clearTimeout);
     showScreen('resultsArea');
     document.getElementById('resultsArea').style.display = 'block';
-    document.getElementById('resultsContent').innerHTML = `<div class="error-box"><strong>⚠️ Error</strong><br><br>${err.message}<br><br><span style="font-size:12px">• Make sure your PDF files have selectable text (not scanned images)<br>• Check your internet connection and try again</span></div>`;
+    document.getElementById('resultsContent').innerHTML = `
+      <div class="error-box">
+        <strong>⚠️ Error</strong><br><br>${err.message}<br><br>
+        <span style="font-size:12px">
+          • PDF files must have selectable text (not scanned images)<br>
+          • If you have 35+ files, try uploading in two separate runs of ~17 files each<br>
+          • Check your internet connection and try again
+        </span>
+      </div>`;
   }
 }
 
@@ -521,7 +668,10 @@ const GRADS=['linear-gradient(90deg,#ef4444,#f97316)','linear-gradient(90deg,#25
 function renderResults(d) {
   const s=d.summary||{}, subs=d.subscriptions||[], hidden=d.hiddenCharges||[], cats=d.categories||[];
   const insights=d.insights||[], merchants=d.topMerchants||[], trend=d.monthlyTrend||[];
-  const txns=d.recentTransactions||[], plan=d.actionPlan||[];
+  const txns=d._transactions||[], plan=d.actionPlan||[];
+  const coach=d.spendingCoach||[], creditTips=d.creditScoreTips||[];
+  const cashback=d.cashbackOpportunities||[], negotiate=d.billNegotiation||[];
+  const secAlerts=d.securityAlerts||[];
   const dangerSubs=subs.filter(x=>x.risk==='high');
   const maxCat=Math.max(...cats.map(c=>c.amount),1);
   const maxTrend=Math.max(...trend.map(t=>t.amount),1);
@@ -638,8 +788,106 @@ function renderResults(d) {
         </div>`).join('')}
     </div>`:''}
 
+    ${secAlerts.length?`
+    <div class="section-divider"><span>🔐 Security Alerts</span></div>
+    <div class="card alert-red">
+      <div class="card-title">Financial Security Issues Detected <span class="ct-count">${secAlerts.length}</span></div>
+      ${secAlerts.map(a=>`
+        <div class="hc-row" style="border-left:3px solid ${a.severity==='critical'?'var(--red)':a.severity==='warning'?'var(--yellow)':'var(--primary)'}">
+          <div style="flex:1">
+            <div class="hc-name">${a.severity==='critical'?'🚨':a.severity==='warning'?'⚠️':'ℹ️'} ${a.title}</div>
+            <div class="hc-detail">${a.description}</div>
+            <div class="hc-action">${a.action||''}</div>
+          </div>
+          <span class="pill ${a.severity==='critical'?'pill-red':a.severity==='warning'?'pill-yellow':'pill-green'}">${a.severity.toUpperCase()}</span>
+        </div>`).join('')}
+    </div>`:''}
+
+    ${coach.length?`
+    <div class="section-divider"><span>🧠 Spending Pattern Coach</span></div>
+    <div class="card">
+      <div class="card-title">Where You're Overspending & Better Alternatives</div>
+      ${coach.map(c=>`
+        <div class="hc-row">
+          <div style="flex:1">
+            <div class="hc-name">${c.icon} ${c.title}</div>
+            <div class="hc-detail">${c.observation}</div>
+            <div class="hc-action">💡 ${c.alternative}</div>
+          </div>
+          <div style="text-align:right;flex-shrink:0">
+            <div style="font-size:13px;font-weight:800;color:var(--red)">${fmt(c.annualCost)}/yr</div>
+            <div style="font-size:11px;color:var(--green);font-weight:700">Save ${fmt(c.saving)}</div>
+          </div>
+        </div>`).join('')}
+    </div>`:''}
+
+    ${creditTips.length?`
+    <div class="section-divider"><span>📈 Credit Score Coach</span></div>
+    <div class="card">
+      <div class="card-title">How to Improve Your Credit Score</div>
+      ${creditTips.map(t=>`
+        <div class="sub-row risk-${t.impact==='high'?'high':t.impact==='medium'?'medium':'low'}">
+          <div style="flex:1">
+            <div class="sub-name">${t.factor}</div>
+            <div class="sub-reason">Current: ${t.currentStatus} · ${t.action}</div>
+          </div>
+          <div class="sub-right">
+            <div style="font-size:16px;font-weight:800;color:var(--green)">+${t.pointsGain} pts</div>
+            <span class="pill ${t.impact==='high'?'pill-red':t.impact==='medium'?'pill-yellow':'pill-green'}">${t.impact} impact</span>
+          </div>
+        </div>`).join('')}
+    </div>`:''}
+
+    ${cashback.length?`
+    <div class="section-divider"><span>💰 Cashback Maximizer</span></div>
+    <div class="card">
+      <div class="card-title">You're Leaving Money on the Table</div>
+      <table>
+        <thead><tr><th>Category</th><th>Your Spend</th><th>Current Card & Rate</th><th>Better Card</th><th>Better Rate</th><th>Annual Gain</th></tr></thead>
+        <tbody>
+          ${cashback.map(c=>`
+            <tr>
+              <td style="font-weight:600">${c.category}</td>
+              <td>${fmt(c.currentSpend)}/yr</td>
+              <td><span class="cat-tag">${c.currentCard} ${(c.currentRate||0)}%</span></td>
+              <td style="color:var(--primary);font-weight:600">${c.betterCard}</td>
+              <td style="color:var(--green);font-weight:700">${c.betterRate}%</td>
+              <td style="font-weight:800;color:var(--green)">${fmt(c.annualGain)}</td>
+            </tr>`).join('')}
+        </tbody>
+      </table>
+      <div style="margin-top:12px;padding:10px 14px;background:var(--green-light);border-radius:var(--radius-sm);font-size:13px;color:var(--green-dark)">
+        💡 Total additional cashback with optimal cards: <strong>${fmt(cashback.reduce((a,c)=>a+(c.annualGain||0),0))}/year</strong>
+      </div>
+    </div>`:''}
+
+    ${negotiate.length?`
+    <div class="section-divider"><span>🤝 Bill Negotiation Intelligence</span></div>
+    <div class="card">
+      <div class="card-title">Bills You Can Negotiate Down Right Now</div>
+      ${negotiate.map(n=>`
+        <div class="sub-row risk-high" style="flex-direction:column;gap:10px">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;width:100%">
+            <div>
+              <div class="sub-name">${n.merchant}</div>
+              <div class="sub-reason">You pay ${fmt(n.currentAmount)}/mo · Market rate ${fmt(n.marketRate)}/mo · Success rate: ${n.successRate}</div>
+              <div style="font-size:11px;color:var(--muted);margin-top:2px">Best time to call: ${n.bestTime||'Weekday mornings'}</div>
+            </div>
+            <div style="text-align:right;flex-shrink:0;margin-left:12px">
+              <div style="font-size:15px;font-weight:800;color:var(--green)">Save ${fmt((n.overpaying||0)*12)}/yr</div>
+              <span class="pill pill-red">Overpaying ${fmt(n.overpaying)}/mo</span>
+            </div>
+          </div>
+          ${n.script?`
+          <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:var(--radius-sm);padding:10px 14px;width:100%">
+            <div style="font-size:10px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">📞 Word-for-word script</div>
+            <div style="font-size:12px;color:var(--text2);line-height:1.6;font-style:italic">"${n.script}"</div>
+          </div>`:''}
+        </div>`).join('')}
+    </div>`:''}
+
     ${insights.length?`
-    <div class="section-divider"><span>💡 Insights</span></div>
+    <div class="section-divider"><span>💡 AI Insights</span></div>
     <div class="card">
       <div class="card-title">Personalized Observations</div>
       <div class="grid-2">
@@ -658,17 +906,23 @@ function renderResults(d) {
     </div>`:''}
 
     ${txns.length?`
-    <div class="section-divider"><span>📋 Recent Transactions</span></div>
+    <div class="section-divider"><span>📋 Transaction History</span></div>
     <div class="card">
-      <div class="card-title">Latest Activity</div>
+      <div class="card-title">All Transactions <span class="ct-count">${txns.length} total</span></div>
       <table>
-        <thead><tr><th>Date</th><th>Merchant</th><th>Category</th><th>Amount</th></tr></thead>
-        <tbody>${txns.slice(0,30).map(t=>`<tr><td style="color:var(--muted)">${t.date||''}</td><td style="font-weight:500">${t.merchant}</td><td><span class="cat-tag">${t.category||''}</span></td><td style="font-weight:700">${fmt(t.amount)}</td></tr>`).join('')}</tbody>
+        <thead><tr><th>Date</th><th>Merchant</th><th>Type</th><th>Amount</th></tr></thead>
+        <tbody>${txns.slice(0,50).map(t=>`<tr>
+          <td style="color:var(--muted)">${t.date||''}</td>
+          <td style="font-weight:500">${t.merchant}</td>
+          <td><span class="cat-tag" style="${t.credit?'color:var(--green)':''}">${t.credit?'Credit/Payment':'Purchase'}</span></td>
+          <td style="font-weight:700;color:${t.credit?'var(--green)':'var(--text)'}">${t.credit?'-':''}${fmt(t.amount)}</td>
+        </tr>`).join('')}</tbody>
       </table>
+      ${txns.length>50?`<div style="text-align:center;padding:10px;font-size:12px;color:var(--muted)">Showing 50 of ${txns.length} transactions</div>`:''}
     </div>`:''}
 
     <div style="text-align:center;padding:16px 0;color:var(--muted);font-size:11px">
-      ${uploadedFiles.length} statement${uploadedFiles.length>1?'s':''} analyzed · Powered by Claude AI · Data stays in your browser
+      ${uploadedFiles.length} statement${uploadedFiles.length>1?'s':''} · ${(d._transactions||[]).length} transactions · Powered by Claude AI · All data stays on your device
     </div>`;
 }
 
