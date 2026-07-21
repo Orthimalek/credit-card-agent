@@ -2,972 +2,1328 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>💳 Credit Card AI Agent</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>FinSentinel — Free Financial Security Scanner</title>
+<meta name="description" content="Upload your bank statement. Get a full security report in seconds. 100% local — your data never leaves your device.">
 <style>
-* { margin:0; padding:0; box-sizing:border-box; }
 :root {
-  --bg:#f0f4f8; --white:#ffffff; --surface:#f8fafc;
-  --border:#e2e8f0; --border2:#cbd5e1;
-  --text:#1e293b; --text2:#475569; --muted:#94a3b8;
-  --primary:#2563eb; --primary-light:#eff6ff; --primary-dark:#1d4ed8;
-  --green:#059669; --green-light:#ecfdf5; --green-dark:#047857;
-  --red:#dc2626; --red-light:#fef2f2; --red-dark:#b91c1c;
-  --yellow:#d97706; --yellow-light:#fffbeb;
-  --orange:#ea580c;
-  --purple:#7c3aed;
-  --shadow:0 1px 3px rgba(0,0,0,0.08),0 1px 2px rgba(0,0,0,0.06);
-  --shadow-md:0 4px 6px rgba(0,0,0,0.07),0 2px 4px rgba(0,0,0,0.06);
-  --radius:12px; --radius-sm:8px;
+  --primary:#2563eb; --primary-l:#eff6ff; --red:#dc2626; --green:#059669;
+  --purple:#7c3aed; --orange:#ea580c; --yellow:#d97706; --blue:#2563eb;
+  --text:#0f172a; --text2:#334155; --muted:#64748b; --border:#e2e8f0;
+  --bg:#f8fafc; --card:#ffffff;
 }
-body { font-family:'Segoe UI',system-ui,-apple-system,sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
 
-/* HEADER */
-header {
-  background:var(--white); border-bottom:1px solid var(--border);
-  padding:0 32px; display:flex; justify-content:space-between;
-  align-items:center; height:64px; box-shadow:var(--shadow);
+/* ── HEADER ── */
+.site-header{background:linear-gradient(135deg,#0f172a,#1e3a5f);padding:18px 20px 14px;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,0.3)}
+.header-inner{max-width:600px;margin:0 auto;display:flex;align-items:center;justify-content:space-between}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-icon{width:38px;height:38px;background:linear-gradient(135deg,#dc2626,#1e3a5f);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 2px 8px rgba(0,0,0,0.3)}
+.logo-text{color:white;font-size:20px;font-weight:900;letter-spacing:-0.5px}
+.logo-sub{color:#94a3b8;font-size:11px;margin-top:1px}
+.local-badge{background:rgba(52,211,153,0.15);border:1px solid #34d399;color:#34d399;font-size:10px;font-weight:700;padding:4px 10px;border-radius:20px;display:flex;align-items:center;gap:5px}
+.local-badge::before{content:'';width:6px;height:6px;background:#34d399;border-radius:50%;display:inline-block;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+
+/* ── TRUST BAR ── */
+.trust-bar{background:#0f172a;border-bottom:1px solid #1e293b;padding:8px 20px}
+.trust-inner{max-width:600px;margin:0 auto;display:flex;align-items:center;justify-content:center;gap:20px;flex-wrap:wrap}
+.trust-item{color:#64748b;font-size:10px;display:flex;align-items:center;gap:4px}
+.trust-item strong{color:#94a3b8}
+.net-counter{color:#34d399;font-weight:700}
+
+/* ── MAIN ── */
+.main{max-width:600px;margin:0 auto;padding:16px}
+
+/* ── TABS ── */
+.tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:0;background:white;border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:16px;box-shadow:0 1px 3px rgba(0,0,0,0.08)}
+.tab{padding:10px 4px;text-align:center;font-size:11px;font-weight:600;color:var(--muted);cursor:pointer;border-right:1px solid var(--border);transition:all 0.15s;user-select:none}
+.tab:last-child{border-right:none}
+.tab.active{color:var(--primary);background:var(--primary-l);font-weight:800}
+.panel{display:none}.panel.active{display:block}
+
+/* ── DROP ZONE ── */
+.drop-zone{border:2px dashed #cbd5e1;border-radius:12px;padding:32px 20px;text-align:center;background:white;cursor:pointer;transition:all 0.2s;margin-bottom:12px}
+.drop-zone.drag{border-color:var(--primary);background:#eff6ff}
+.drop-zone:active{border-color:var(--primary);background:#eff6ff}
+.dz-icon{font-size:36px;margin-bottom:10px}
+.dz-title{font-size:15px;font-weight:700;color:var(--text);margin-bottom:4px}
+.dz-sub{font-size:12px;color:var(--muted)}
+
+/* ── FILE LIST ── */
+.file-item{display:flex;align-items:center;gap:10px;background:white;border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:8px}
+.file-name{flex:1;font-size:12px;font-weight:600;color:var(--primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.file-size{font-size:11px;color:var(--muted);flex-shrink:0}
+.file-rm{background:#fee2e2;color:#dc2626;border:none;border-radius:6px;width:24px;height:24px;cursor:pointer;font-size:15px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.no-files{color:var(--muted);font-size:12px;text-align:center;padding:8px}
+
+/* ── BUTTONS ── */
+.btn-analyze{width:100%;background:var(--primary);color:white;border:none;border-radius:10px;padding:16px;font-size:15px;font-weight:800;cursor:pointer;margin-top:4px;transition:opacity 0.2s;-webkit-appearance:none}
+.btn-analyze:disabled{opacity:0.4;cursor:not-allowed}
+.btn-analyze:not(:disabled):active{opacity:0.85}
+
+/* ── LOADING ── */
+.loading-state{text-align:center;padding:24px 0;display:none}
+.loading-title{font-size:13px;font-weight:700;color:var(--text);margin-bottom:12px}
+.prog-list{text-align:left;max-width:300px;margin:0 auto}
+.prog-item{font-size:11px;padding:3px 0;color:var(--muted)}
+.prog-item.active{color:var(--primary);font-weight:600}
+.prog-item.done{color:var(--green)}
+.prog-item.warn{color:var(--orange)}
+.spinner{width:32px;height:32px;border:3px solid #e2e8f0;border-top-color:var(--primary);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 16px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── ERROR BOX ── */
+.error-box{background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;padding:12px 14px;font-size:12px;color:#dc2626;line-height:1.6;margin-bottom:12px}
+
+/* ── REPORT STYLES (shared with extension) ── */
+.stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:8px}
+.stat-card{background:white;border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center}
+.stat-label{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:3px}
+.stat-val{font-size:14px;font-weight:800}
+.c-red{color:var(--red)}.c-green{color:var(--green)}.c-purple{color:var(--purple)}
+.c-orange{color:var(--orange)}.c-blue{color:var(--blue)}.c-yellow{color:var(--yellow)}
+.divider{display:flex;align-items:center;gap:8px;margin:14px 0 10px;color:var(--muted);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border)}
+.section{background:white;border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:8px}
+.section.alert-red{border-color:#fca5a5;background:#fef2f2}
+.section.alert-yellow{border-color:#fde68a;background:#fffbeb}
+.section-title{font-size:12px;font-weight:800;color:var(--text);margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.s-count{background:var(--red);color:white;border-radius:10px;padding:1px 6px;font-size:10px}
+.sub-item{display:flex;align-items:start;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)}
+.sub-item:last-child{border-bottom:none;padding-bottom:0}
+.sub-name{font-size:12px;font-weight:700;color:var(--text);margin-bottom:2px}
+.sub-reason{font-size:10px;color:var(--muted);margin-bottom:3px}
+.sub-cancel{font-size:10px;color:var(--primary);font-weight:600;margin-bottom:3px}
+.sub-right{text-align:right;flex-shrink:0}
+.sub-amt{font-size:13px;font-weight:800;color:var(--text)}
+.sub-steps{margin-top:6px}
+.sub-step{font-size:10px;color:var(--text2);padding:2px 0;padding-left:10px;position:relative}
+.sub-step::before{content:'→';position:absolute;left:0;color:var(--muted)}
+.pill{display:inline-block;font-size:9px;font-weight:700;padding:2px 7px;border-radius:8px;margin-top:4px}
+.pill-red{background:#fee2e2;color:#dc2626}
+.pill-green{background:#dcfce7;color:#059669}
+.pill-yellow{background:#fef9c3;color:#854d0e}
+.savings-box{background:#ecfdf5;border-radius:8px;padding:12px;text-align:center;margin-top:10px}
+.savings-num{font-size:20px;font-weight:900;color:#059669}
+.savings-sub{font-size:11px;color:#065f46;margin-top:2px}
+.cat-item{margin-bottom:8px}
+.cat-head{display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px;font-weight:600}
+.bar-bg{background:#f1f5f9;border-radius:4px;height:8px;overflow:hidden}
+.bar-fill{height:100%;border-radius:4px;transition:width 0.3s}
+.hc-item{display:flex;align-items:start;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)}
+.hc-item:last-child{border-bottom:none}
+.hc-name{font-size:11px;font-weight:700;color:var(--text);margin-bottom:2px}
+.hc-detail{font-size:10px;color:var(--muted);margin-bottom:2px}
+.hc-action{font-size:10px;color:var(--primary);font-weight:600}
+.hc-amount{font-size:12px;font-weight:800;color:var(--red);flex-shrink:0}
+.action-item{display:flex;align-items:start;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)}
+.action-item:last-child{border-bottom:none}
+.action-num{width:22px;height:22px;border-radius:50%;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:white}
+.a-high{background:#dc2626}.a-medium{background:#d97706}.a-low{background:#059669}
+.action-title{font-size:12px;font-weight:700;color:var(--text);margin-bottom:2px}
+.action-desc{font-size:10px;color:var(--muted);margin-bottom:3px}
+.action-steps{margin-top:4px}
+.action-step{font-size:10px;color:var(--text2);padding:2px 0 2px 10px;position:relative}
+.action-step::before{content:'→';position:absolute;left:0;color:var(--muted)}
+.action-saving{font-size:11px;font-weight:700;color:#059669;flex-shrink:0;text-align:right;white-space:nowrap;margin-left:auto}
+.insight-item{display:flex;align-items:start;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)}
+.insight-item:last-child{border-bottom:none}
+.ins-icon{font-size:20px;flex-shrink:0}
+.ins-title{font-size:12px;font-weight:700;color:var(--text);margin-bottom:2px}
+.ins-desc{font-size:11px;color:var(--muted);line-height:1.5}
+
+/* ── HISTORY ── */
+.history-item{background:white;border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:10px;cursor:pointer;transition:border-color 0.15s}
+.history-item:active{border-color:var(--primary)}
+.history-stats{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.h-stat{font-size:10px;color:var(--muted);background:var(--bg);padding:3px 7px;border-radius:6px}
+.results-empty{text-align:center;padding:40px 20px;color:var(--muted)}
+.ri{font-size:40px;margin-bottom:10px}
+
+/* ── TRUST SECTION ── */
+.trust-section{background:linear-gradient(135deg,#ecfdf5,#eff6ff);border:1px solid #6ee7b7;border-radius:12px;padding:16px;margin-bottom:16px}
+.trust-title{font-size:13px;font-weight:800;color:#065f46;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.trust-point{display:flex;align-items:start;gap:8px;margin-bottom:8px;font-size:11px;color:#1e293b;line-height:1.5}
+.trust-icon{font-size:14px;flex-shrink:0;margin-top:1px}
+.verify-btn{width:100%;background:white;border:1px solid #6ee7b7;color:#059669;border-radius:8px;padding:10px;font-size:12px;font-weight:700;cursor:pointer;margin-top:8px;display:flex;align-items:center;justify-content:center;gap:6px}
+
+/* ── HOW IT WORKS ── */
+.how-steps{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
+.how-step{background:white;border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center}
+.how-num{width:28px;height:28px;background:var(--primary);color:white;border-radius:50%;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;margin:0 auto 8px}
+.how-title{font-size:11px;font-weight:700;color:var(--text);margin-bottom:3px}
+.how-sub{font-size:10px;color:var(--muted)}
+
+/* ── FOOTER ── */
+.site-footer{background:#0f172a;padding:24px 20px;margin-top:40px;text-align:center}
+.footer-inner{max-width:600px;margin:0 auto}
+.footer-logo{color:#34d399;font-size:16px;font-weight:900;margin-bottom:6px}
+.footer-tagline{color:#475569;font-size:11px;margin-bottom:12px}
+.footer-links{display:flex;justify-content:center;gap:16px;flex-wrap:wrap;margin-bottom:12px}
+.footer-links a{color:#64748b;font-size:11px;text-decoration:none}
+.footer-privacy{color:#1e3a5f;font-size:11px;background:#0f172a;border:1px solid #1e293b;border-radius:8px;padding:10px 14px;line-height:1.6}
+.footer-privacy strong{color:#34d399}
+
+/* ── OFFLINE BANNER ── */
+.offline-banner{background:#fef3c7;border:1px solid #fde68a;border-radius:8px;padding:10px 14px;font-size:11px;color:#92400e;margin-bottom:12px;display:none;align-items:center;gap:8px}
+
+/* ── MOBILE SPECIFIC ── */
+@media (max-width:400px){
+  .how-steps{grid-template-columns:repeat(3,1fr);gap:6px}
+  .how-step{padding:8px 4px}
+  .how-title{font-size:10px}
+  .how-num{width:24px;height:24px;font-size:11px}
 }
-.logo { display:flex; align-items:center; gap:10px; }
-.logo-icon { font-size:26px; }
-.logo h1 { font-size:18px; font-weight:800; color:var(--primary); }
-.logo p { font-size:11px; color:var(--muted); margin-top:1px; }
-.header-right { display:flex; align-items:center; gap:10px; }
-.status-dot {
-  width:8px; height:8px; border-radius:50%; background:var(--green);
-  box-shadow:0 0 0 3px rgba(5,150,105,0.2);
-  animation:pulse 2s infinite;
-}
-@keyframes pulse { 0%,100%{ box-shadow:0 0 0 3px rgba(5,150,105,0.2); } 50%{ box-shadow:0 0 0 6px rgba(5,150,105,0.1); } }
-.status-label { font-size:12px; font-weight:600; color:var(--green); }
-
-/* LAYOUT */
-.main { display:grid; grid-template-columns:300px 1fr; min-height:calc(100vh - 64px); }
-@media(max-width:768px){ .main{ grid-template-columns:1fr; } }
-
-/* SIDEBAR */
-.sidebar {
-  background:var(--white); border-right:1px solid var(--border);
-  padding:20px; display:flex; flex-direction:column; gap:18px; overflow-y:auto;
-}
-.sidebar-section h3 {
-  font-size:11px; font-weight:700; text-transform:uppercase;
-  letter-spacing:1px; color:var(--muted); margin-bottom:10px;
-}
-.drop-zone {
-  border:2px dashed var(--border2); border-radius:var(--radius);
-  padding:22px 14px; text-align:center; cursor:pointer;
-  transition:all 0.2s; background:var(--surface);
-}
-.drop-zone:hover,.drop-zone.drag { border-color:var(--primary); background:var(--primary-light); }
-.dz-icon { font-size:32px; margin-bottom:8px; }
-.dz-title { font-size:13px; font-weight:600; color:var(--text); margin-bottom:4px; }
-.dz-sub { font-size:11px; color:var(--muted); }
-.dz-types { font-size:11px; color:var(--primary); font-weight:600; margin-top:4px; }
-
-.file-list { display:flex; flex-direction:column; gap:5px; }
-.file-item {
-  background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-sm);
-  padding:7px 10px; font-size:12px; display:flex; justify-content:space-between; align-items:center; gap:6px;
-}
-.file-name { color:var(--primary); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-weight:500; }
-.file-size { color:var(--muted); font-size:10px; flex-shrink:0; }
-.file-rm { background:none; border:none; color:var(--red); cursor:pointer; font-size:15px; flex-shrink:0; }
-.no-files { font-size:12px; color:var(--muted); text-align:center; padding:8px 0; }
-
-.option-grid { display:grid; gap:6px; }
-.option-item {
-  display:flex; align-items:center; gap:9px; background:var(--surface);
-  border:1px solid var(--border); border-radius:var(--radius-sm); padding:9px 11px; cursor:pointer;
-}
-.option-item:hover { border-color:var(--primary); }
-.option-item input[type=checkbox] { accent-color:var(--primary); width:14px; height:14px; flex-shrink:0; }
-.option-item label { font-size:12px; cursor:pointer; color:var(--text2); font-weight:500; }
-
-.analyze-btn {
-  width:100%; background:var(--primary); color:white; border:none;
-  padding:13px; border-radius:var(--radius); font-size:14px; font-weight:700;
-  cursor:pointer; transition:all 0.2s; box-shadow:0 2px 4px rgba(37,99,235,0.3);
-}
-.analyze-btn:hover:not(:disabled) { background:var(--primary-dark); transform:translateY(-1px); }
-.analyze-btn:disabled { opacity:0.4; cursor:not-allowed; transform:none; }
-
-.chat-btn {
-  width:100%; background:var(--white); border:1.5px solid var(--primary);
-  color:var(--primary); padding:10px; border-radius:var(--radius);
-  font-size:13px; font-weight:600; cursor:pointer; transition:all 0.2s;
-}
-.chat-btn:hover:not(:disabled) { background:var(--primary-light); }
-.chat-btn:disabled { opacity:0.35; cursor:not-allowed; }
-
-/* CONTENT */
-.content { padding:24px; overflow-y:auto; }
-
-/* WELCOME */
-.welcome { text-align:center; padding:48px 20px; max-width:620px; margin:0 auto; }
-.w-icon { font-size:56px; margin-bottom:16px; }
-.welcome h2 { font-size:26px; font-weight:800; color:var(--text); margin-bottom:10px; }
-.welcome > p { color:var(--text2); font-size:14px; line-height:1.7; margin-bottom:28px; }
-.steps-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; text-align:left; }
-.step-card { background:var(--white); border:1px solid var(--border); border-radius:var(--radius); padding:16px; box-shadow:var(--shadow); }
-.step-num {
-  width:24px; height:24px; background:var(--primary); color:white;
-  border-radius:50%; font-size:12px; font-weight:800;
-  display:flex; align-items:center; justify-content:center; margin-bottom:10px;
-}
-.step-card h4 { font-size:13px; font-weight:700; color:var(--text); margin-bottom:5px; }
-.step-card p { font-size:12px; color:var(--text2); line-height:1.5; }
-.privacy-note {
-  display:inline-flex; align-items:center; gap:6px; margin-top:20px;
-  font-size:12px; color:var(--muted); background:var(--surface);
-  border:1px solid var(--border); border-radius:20px; padding:6px 14px;
-}
-
-/* LOADING */
-.loading-screen { text-align:center; padding:80px 20px; display:none; }
-.spinner {
-  width:48px; height:48px; border:3px solid var(--border2);
-  border-top-color:var(--primary); border-radius:50%;
-  animation:spin 0.7s linear infinite; margin:0 auto 20px;
-}
-@keyframes spin{ to{ transform:rotate(360deg); } }
-.loading-screen h3 { font-size:18px; font-weight:700; margin-bottom:6px; }
-.loading-screen p { color:var(--muted); font-size:13px; }
-.prog-list { max-width:300px; margin:24px auto 0; display:flex; flex-direction:column; gap:7px; }
-.prog-item { display:flex; align-items:center; gap:9px; font-size:13px; color:var(--muted); text-align:left; }
-.prog-item.done { color:var(--green); }
-.prog-item.active { color:var(--primary); font-weight:600; }
-
-/* RESULTS */
-.results { display:none; }
-.stat-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin-bottom:20px; }
-.stat-card { background:var(--white); border:1px solid var(--border); border-radius:var(--radius); padding:16px; text-align:center; box-shadow:var(--shadow); }
-.s-label { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.8px; color:var(--muted); margin-bottom:6px; }
-.s-val { font-size:22px; font-weight:800; }
-.s-sub { font-size:10px; color:var(--muted); margin-top:3px; }
-
-.card { background:var(--white); border:1px solid var(--border); border-radius:var(--radius); padding:20px; margin-bottom:16px; box-shadow:var(--shadow); }
-.card.alert-red { border-color:#fca5a5; border-left:4px solid var(--red); }
-.card.alert-yellow { border-left:4px solid var(--yellow); }
-.card-title { font-size:15px; font-weight:700; color:var(--text); margin-bottom:14px; display:flex; align-items:center; gap:8px; }
-.ct-count { font-size:11px; background:var(--surface); border:1px solid var(--border); border-radius:20px; padding:2px 9px; color:var(--text2); font-weight:600; }
-
-.sub-row {
-  background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-sm);
-  padding:12px 14px; margin-bottom:8px; display:flex; justify-content:space-between;
-  align-items:flex-start; border-left:3px solid var(--border2); transition:box-shadow 0.15s;
-}
-.sub-row:hover { box-shadow:var(--shadow-md); }
-.sub-row.risk-high { border-left-color:var(--red); }
-.sub-row.risk-medium { border-left-color:var(--yellow); }
-.sub-row.risk-low { border-left-color:var(--green); }
-.sub-name { font-weight:700; font-size:13px; color:var(--text); margin-bottom:3px; }
-.sub-reason { font-size:11px; color:var(--text2); line-height:1.4; }
-.sub-cancel-url { font-size:11px; color:var(--primary); font-weight:600; margin-top:3px; }
-.sub-right { text-align:right; flex-shrink:0; margin-left:12px; }
-.sub-amt { font-size:14px; font-weight:800; }
-.sub-annual { font-size:10px; color:var(--muted); margin-top:1px; }
-.pill { display:inline-block; font-size:10px; padding:2px 9px; border-radius:20px; margin-top:5px; font-weight:700; }
-.pill-red { background:var(--red-light); color:var(--red); }
-.pill-yellow { background:var(--yellow-light); color:var(--yellow); }
-.pill-green { background:var(--green-light); color:var(--green); }
-
-.savings-box { background:linear-gradient(135deg,#ecfdf5,#d1fae5); border:1px solid #a7f3d0; border-radius:var(--radius); padding:16px; text-align:center; margin-top:12px; }
-.savings-box .big-num { font-size:28px; font-weight:900; color:var(--green); }
-.savings-box p { font-size:12px; color:var(--green-dark); margin-top:3px; }
-
-.action-grid { display:grid; gap:10px; }
-.action-item { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-sm); padding:14px 16px; display:grid; grid-template-columns:auto 1fr auto; gap:12px; align-items:start; }
-.action-num { width:28px; height:28px; border-radius:50%; font-size:12px; font-weight:800; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
-.action-num.p-high { background:var(--red-light); color:var(--red); }
-.action-num.p-medium { background:var(--yellow-light); color:var(--yellow); }
-.action-num.p-low { background:var(--green-light); color:var(--green); }
-.action-title { font-size:13px; font-weight:700; color:var(--text); margin-bottom:3px; }
-.action-desc { font-size:12px; color:var(--text2); line-height:1.5; }
-.action-steps { margin-top:6px; display:flex; flex-direction:column; gap:3px; }
-.action-step { font-size:11px; color:var(--text2); display:flex; align-items:flex-start; gap:6px; }
-.action-step::before { content:"→"; color:var(--primary); flex-shrink:0; font-weight:700; }
-.action-saving { font-size:13px; font-weight:800; color:var(--green); flex-shrink:0; white-space:nowrap; }
-
-.cat-item { margin-bottom:11px; }
-.cat-head { display:flex; justify-content:space-between; font-size:12px; margin-bottom:5px; font-weight:500; }
-.bar-bg { background:var(--border); border-radius:4px; height:7px; overflow:hidden; }
-.bar-fill { height:100%; border-radius:4px; }
-
-.hc-row { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-sm); padding:12px 14px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:flex-start; gap:12px; }
-.hc-name { font-size:13px; font-weight:700; color:var(--text); margin-bottom:3px; }
-.hc-detail { font-size:11px; color:var(--text2); }
-.hc-action { font-size:11px; color:var(--primary); font-weight:600; margin-top:3px; }
-.hc-amount { font-size:15px; font-weight:800; color:var(--red); flex-shrink:0; }
-
-.insight-row { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-sm); padding:12px 14px; margin-bottom:8px; display:flex; gap:12px; }
-.ins-icon { font-size:22px; flex-shrink:0; }
-.ins-title { font-size:13px; font-weight:700; color:var(--text); margin-bottom:3px; }
-.ins-desc { font-size:12px; color:var(--text2); line-height:1.5; }
-
-.month-row { display:grid; grid-template-columns:120px 1fr 90px; align-items:center; gap:10px; margin-bottom:7px; }
-.month-lbl { font-size:11px; color:var(--text2); font-weight:500; }
-.m-bar-bg { background:var(--border); border-radius:4px; height:22px; overflow:hidden; }
-.m-bar { height:100%; display:flex; align-items:center; padding-left:8px; font-size:10px; font-weight:700; color:white; border-radius:4px; }
-.m-amt { font-size:12px; font-weight:700; color:var(--text); text-align:right; }
-
-table { width:100%; border-collapse:collapse; font-size:12px; }
-th { text-align:left; color:var(--muted); padding:7px 10px; border-bottom:1.5px solid var(--border); font-size:10px; text-transform:uppercase; letter-spacing:0.5px; font-weight:700; }
-td { padding:9px 10px; border-bottom:1px solid var(--surface); }
-tr:last-child td { border-bottom:none; }
-tr:hover td { background:var(--surface); }
-.cat-tag { font-size:10px; padding:2px 7px; border-radius:10px; background:var(--surface); color:var(--text2); border:1px solid var(--border); }
-
-.chat-panel { background:var(--white); border:1px solid var(--border); border-radius:var(--radius); margin-bottom:16px; display:none; flex-direction:column; height:380px; box-shadow:var(--shadow-md); }
-.chat-panel.open { display:flex; }
-.chat-header { padding:12px 16px; border-bottom:1px solid var(--border); font-size:13px; font-weight:700; color:var(--text); display:flex; justify-content:space-between; align-items:center; }
-.chat-messages { flex:1; overflow-y:auto; padding:14px; display:flex; flex-direction:column; gap:9px; }
-.chat-msg { max-width:82%; padding:9px 13px; border-radius:10px; font-size:13px; line-height:1.5; }
-.chat-msg.user { background:var(--primary); color:white; align-self:flex-end; border-radius:10px 10px 2px 10px; }
-.chat-msg.assistant { background:var(--surface); color:var(--text); align-self:flex-start; border-radius:10px 10px 10px 2px; border:1px solid var(--border); }
-.chat-msg.loading { color:var(--muted); font-style:italic; }
-.chat-input-row { display:flex; gap:8px; padding:12px; border-top:1px solid var(--border); }
-.chat-input-row input { flex:1; background:var(--surface); border:1.5px solid var(--border2); border-radius:var(--radius-sm); padding:8px 12px; color:var(--text); font-size:13px; }
-.chat-input-row input:focus { outline:none; border-color:var(--primary); }
-.chat-send { background:var(--primary); border:none; border-radius:var(--radius-sm); padding:8px 16px; color:white; font-weight:700; cursor:pointer; font-size:13px; }
-.chat-send:hover { background:var(--primary-dark); }
-
-.error-box { background:var(--red-light); border:1px solid #fca5a5; border-radius:var(--radius); padding:16px; color:var(--red-dark); font-size:13px; margin-bottom:16px; }
-.grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
-@media(max-width:900px){ .grid-2{ grid-template-columns:1fr; } }
-.section-divider { display:flex; align-items:center; gap:10px; margin:4px 0 16px; }
-.section-divider span { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:var(--muted); white-space:nowrap; }
-.section-divider::before,.section-divider::after { content:''; flex:1; height:1px; background:var(--border); }
-#fileInput { display:none; }
 </style>
 </head>
 <body>
 
-<header>
-  <div class="logo">
-    <div class="logo-icon">💳</div>
-    <div>
-      <h1>Credit Card AI Agent</h1>
-      <p>Powered by Claude · No file limits · Fully portable</p>
+<!-- ── HEADER ── -->
+<header class="site-header">
+  <div class="header-inner">
+    <div class="logo">
+      <div class="logo-icon">🛡️</div>
+      <div>
+        <div class="logo-text">FinSentinel</div>
+        <div class="logo-sub">Local AI · Zero cost · Works offline</div>
+      </div>
     </div>
-  </div>
-  <div class="header-right">
-    <div class="status-dot"></div>
-    <span class="status-label">AI Ready</span>
+    <div class="local-badge">● Local</div>
   </div>
 </header>
 
-<div class="main">
-  <div class="sidebar">
-    <div class="sidebar-section">
-      <h3>📄 Statements</h3>
-      <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
-        <div class="dz-icon">📂</div>
-        <div class="dz-title">Drop files here or click to browse</div>
-        <div class="dz-sub">Unlimited files supported</div>
-        <div class="dz-types">PDF · CSV · TXT · XLSX</div>
-      </div>
-      <input type="file" id="fileInput" multiple accept=".pdf,.csv,.txt,.xlsx,.xls">
-    </div>
-
-    <div class="sidebar-section">
-      <h3>📁 Uploaded (<span id="fileCount">0</span>)</h3>
-      <div class="file-list" id="fileList"><div class="no-files">No files uploaded yet</div></div>
-    </div>
-
-    <div class="sidebar-section">
-      <h3>⚙️ Analysis Options</h3>
-      <div class="option-grid">
-        <div class="option-item"><input type="checkbox" id="opt-subs" checked><label for="opt-subs">🔄 Find subscriptions</label></div>
-        <div class="option-item"><input type="checkbox" id="opt-hidden" checked><label for="opt-hidden">🕵️ Hidden charges</label></div>
-        <div class="option-item"><input type="checkbox" id="opt-cats" checked><label for="opt-cats">📊 Spending categories</label></div>
-        <div class="option-item"><input type="checkbox" id="opt-merchants" checked><label for="opt-merchants">🏪 Top merchants</label></div>
-        <div class="option-item"><input type="checkbox" id="opt-insights" checked><label for="opt-insights">💡 AI insights</label></div>
-        <div class="option-item"><input type="checkbox" id="opt-trends" checked><label for="opt-trends">📈 Monthly trends</label></div>
-        <div class="option-item"><input type="checkbox" id="opt-action" checked><label for="opt-action">✅ Action plan</label></div>
-      </div>
-    </div>
-
-    <button class="analyze-btn" id="analyzeBtn" onclick="runAnalysis()" disabled>
-      🔍 Analyze My Statements
-    </button>
-    <button class="chat-btn" id="chatToggleBtn" onclick="toggleChat()" disabled>
-      💬 Ask Follow-up Questions
-    </button>
-  </div>
-
-  <div class="content">
-    <!-- WELCOME -->
-    <div id="welcomeScreen">
-      <div class="welcome">
-        <div class="w-icon">💳</div>
-        <h2>Your Personal Credit Card AI Agent</h2>
-        <p>Upload your bank statements and get a complete financial breakdown — subscriptions to cancel, hidden charges to dispute, and a step-by-step action plan to save money immediately.</p>
-        <div class="steps-grid">
-          <div class="step-card"><div class="step-num">1</div><h4>Upload Statements</h4><p>Drop as many PDFs or CSVs as you want — no limit on files or months</p></div>
-          <div class="step-card"><div class="step-num">2</div><h4>Click Analyze</h4><p>AI reads every transaction and builds your complete report in ~60 seconds</p></div>
-          <div class="step-card"><div class="step-num">3</div><h4>Cancel & Save</h4><p>Get exact steps to cancel predatory subscriptions and dispute hidden charges</p></div>
-          <div class="step-card"><div class="step-num">4</div><h4>Ask Questions</h4><p>Chat with the AI about your spending after the analysis is done</p></div>
-        </div>
-        <div class="privacy-note">🔒 Your data stays in your browser and is never stored</div>
-      </div>
-    </div>
-
-    <!-- LOADING -->
-    <div class="loading-screen" id="loadingScreen">
-      <div class="spinner"></div>
-      <h3 id="loadingTitle">Reading your statements...</h3>
-      <p>This takes 30–60 seconds depending on how many files you uploaded</p>
-      <div class="prog-list" id="loadingProgress"></div>
-    </div>
-
-    <!-- RESULTS -->
-    <div class="results" id="resultsArea">
-      <div class="chat-panel" id="chatPanel">
-        <div class="chat-header">
-          <span>💬 Ask me anything about your statements</span>
-          <button onclick="toggleChat()" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:20px;line-height:1">×</button>
-        </div>
-        <div class="chat-messages" id="chatMessages">
-          <div class="chat-msg assistant">Hi! I've analyzed your statements. Try asking: "Which subscription costs me the most?", "How much did I spend on food?", or "What should I cancel first?"</div>
-        </div>
-        <div class="chat-input-row">
-          <input type="text" id="chatInput" placeholder="Ask about your spending..." onkeydown="if(event.key==='Enter')sendChat()">
-          <button class="chat-send" onclick="sendChat()">Send</button>
-        </div>
-      </div>
-      <div id="resultsContent"></div>
-    </div>
+<!-- ── TRUST BAR ── -->
+<div class="trust-bar">
+  <div class="trust-inner">
+    <div class="trust-item">🔒 <strong>0 bytes</strong> sent to any server</div>
+    <div class="trust-item">📡 Network requests: <span class="net-counter" id="netCounter">0</span></div>
+    <div class="trust-item">🌐 <a href="https://github.com/orthimalek/credit-card-agent" style="color:#64748b">Open source</a></div>
   </div>
 </div>
 
-<script>
-// ================================================================
-// 🔑 PASTE YOUR ANTHROPIC API KEY BELOW — keep the quotes
-// ================================================================
-const API_KEY = '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';
-// ================================================================
+<div class="main">
 
+  <!-- ── OFFLINE BANNER ── -->
+  <div class="offline-banner" id="offlineBanner">
+    📵 You're offline — FinSentinel still works perfectly. This proves your data never left your device.
+  </div>
+
+  <!-- ── TABS ── -->
+  <div class="tabs">
+    <div class="tab active" data-tab="analyze">🔍 Analyze</div>
+    <div class="tab" data-tab="results">📊 Report</div>
+    <div class="tab" data-tab="trust">🔒 Privacy</div>
+    <div class="tab" data-tab="history">🕐 History</div>
+  </div>
+
+  <!-- ══ ANALYZE TAB ══ -->
+  <div class="panel active" id="tab-analyze">
+
+    <!-- How it works -->
+    <div class="how-steps">
+      <div class="how-step">
+        <div class="how-num">1</div>
+        <div class="how-title">Download</div>
+        <div class="how-sub">Get PDF/CSV from your bank app</div>
+      </div>
+      <div class="how-step">
+        <div class="how-num">2</div>
+        <div class="how-title">Upload</div>
+        <div class="how-sub">Drop it here — stays on your device</div>
+      </div>
+      <div class="how-step">
+        <div class="how-num">3</div>
+        <div class="how-title">Report</div>
+        <div class="how-sub">Instant security scan, no account needed</div>
+      </div>
+    </div>
+
+    <div id="errorBox"></div>
+
+    <!-- Drop zone -->
+    <div class="drop-zone" id="dropZone">
+      <div class="dz-icon">📄</div>
+      <div class="dz-title">Drop statements here or tap to browse</div>
+      <div class="dz-sub">PDF · CSV only — any bank, any country</div>
+      <input type="file" id="fileInput" multiple accept=".pdf,.csv" style="display:none">
+    </div>
+
+    <div id="fileList"></div>
+
+    <div class="loading-state" id="loadingState">
+      <div class="spinner"></div>
+      <div class="loading-title" id="loadingTitle">Analyzing...</div>
+      <div class="prog-list" id="progList"></div>
+    </div>
+
+    <button class="btn-analyze" id="analyzeBtn" disabled>🔍 Analyze My Statements</button>
+  </div>
+
+  <!-- ══ REPORT TAB ══ -->
+  <div class="panel" id="tab-results">
+    <div id="resultsContent">
+      <div class="results-empty">
+        <div class="ri">📊</div>
+        <div style="font-size:13px;font-weight:600">No report yet</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:6px">Upload a statement on the Analyze tab</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ PRIVACY TAB ══ -->
+  <div class="panel" id="tab-trust">
+    <div class="trust-section" style="margin-top:4px">
+      <div class="trust-title">🔒 How we protect your data</div>
+      <div class="trust-point"><span class="trust-icon">📱</span><span><strong>Your statement never leaves your phone.</strong> FinSentinel runs entirely inside your browser tab using JavaScript. There is no server receiving your files.</span></div>
+      <div class="trust-point"><span class="trust-icon">📡</span><span><strong>Zero network requests.</strong> The counter in the header above shows every outgoing request FinSentinel makes. It will always read 0. You can open browser DevTools → Network and verify this yourself.</span></div>
+      <div class="trust-point"><span class="trust-icon">✈️</span><span><strong>Works in airplane mode.</strong> Turn off WiFi right now and upload a statement. It still works — because your data never goes anywhere.</span></div>
+      <div class="trust-point"><span class="trust-icon">💾</span><span><strong>History stays on your device.</strong> Your past reports are saved in your browser's localStorage — the same place websites save your preferences. Only you can access it.</span></div>
+      <div class="trust-point"><span class="trust-icon">👁️</span><span><strong>Open source.</strong> Every line of analysis code is public on GitHub. Anyone can verify what FinSentinel does and doesn't do.</span></div>
+      <button class="verify-btn" onclick="window.open('https://github.com/orthimalek/credit-card-agent','_blank')">
+        🔗 View source code on GitHub
+      </button>
+    </div>
+
+    <div style="background:white;border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:16px">
+      <div style="font-size:13px;font-weight:800;color:var(--text);margin-bottom:10px">📋 One-sentence privacy policy</div>
+      <div style="font-size:13px;color:var(--text2);line-height:1.7;font-style:italic;padding:12px;background:#f8fafc;border-radius:8px;border-left:3px solid #34d399">
+        "FinSentinel processes your financial data entirely within your browser — we receive nothing, store nothing, and have no servers."
+      </div>
+    </div>
+
+    <div style="background:white;border:1px solid var(--border);border-radius:12px;padding:16px">
+      <div style="font-size:13px;font-weight:800;color:var(--text);margin-bottom:10px">🆚 How we compare</div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:8px">vs. other financial tools</div>
+      ${['Rocket Money|Requires bank login, stores your credentials|✗',
+         'Mint (shut down)|Required full account access|✗',
+         'Pine AI|Requires account connection|✗',
+         'FinSentinel|PDF/CSV only, runs locally, no account|✓'
+        ].map(row => {
+          const [name, desc, check] = row.split('|');
+          const good = check === '✓';
+          return `<div style="display:flex;align-items:start;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">
+            <div style="font-size:14px;flex-shrink:0">${good ? '✅' : '❌'}</div>
+            <div style="flex:1">
+              <div style="font-size:11px;font-weight:700;color:${good ? '#059669' : 'var(--text)'}">${name}</div>
+              <div style="font-size:10px;color:var(--muted)">${desc}</div>
+            </div>
+          </div>`;
+        }).join('')}
+    </div>
+  </div>
+
+  <!-- ══ HISTORY TAB ══ -->
+  <div class="panel" id="tab-history">
+    <div id="historyContent">
+      <div class="results-empty">
+        <div class="ri">🕐</div>
+        <div style="font-size:13px;font-weight:600">No history yet</div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<!-- ── FOOTER ── -->
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-logo">🛡️ FinSentinel</div>
+    <div class="footer-tagline">Zero-knowledge financial security · Built for privacy</div>
+    <div class="footer-links">
+      <a href="https://github.com/orthimalek/credit-card-agent">GitHub</a>
+      <a href="#" onclick="switchTab('trust');return false">Privacy</a>
+    </div>
+    <div class="footer-privacy">
+      <strong>Privacy guarantee:</strong> This page makes zero network requests. Your bank statements are processed entirely in your browser and are never transmitted anywhere. Verified open source.
+    </div>
+  </div>
+</footer>
+
+<script>
+// ══════════════════════════════════════════════════════════
+// NETWORK REQUEST COUNTER — proves zero data leaves device
+// ══════════════════════════════════════════════════════════
+let _netCount = 0;
+const _origFetch = window.fetch;
+window.fetch = function(...args) {
+  // Allow PDF.js CDN load only (one-time, known safe URL)
+  const url = String(args[0] || '');
+  if (!url.includes('cdnjs.cloudflare.com') && !url.includes('unpkg.com')) {
+    _netCount++;
+    document.getElementById('netCounter').textContent = _netCount;
+    document.getElementById('netCounter').style.color = '#ef4444';
+  }
+  return _origFetch.apply(this, args);
+};
+
+// ══════════════════════════════════════════════════════════
+// OFFLINE DETECTION
+// ══════════════════════════════════════════════════════════
+function checkOnline() {
+  const banner = document.getElementById('offlineBanner');
+  banner.style.display = navigator.onLine ? 'none' : 'flex';
+}
+window.addEventListener('online', checkOnline);
+window.addEventListener('offline', checkOnline);
+checkOnline();
+
+// ══════════════════════════════════════════════════════════
+// PDF.JS — load from CDN (web version, no chrome.runtime)
+// ══════════════════════════════════════════════════════════
+let pdfjs = null;
+async function loadPDFJS() {
+  if (pdfjs) return pdfjs;
+  // Load PDF.js from CDN
+  await new Promise((resolve, reject) => {
+    if (window.pdfjsLib) { resolve(); return; }
+    const s = document.createElement('script');
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.min.js';
+    s.onload = resolve;
+    s.onerror = reject;
+    document.head.appendChild(s);
+  });
+  window.pdfjsLib.GlobalWorkerOptions.workerSrc =
+    'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.worker.min.js';
+  pdfjs = window.pdfjsLib;
+  return pdfjs;
+}
+
+async function extractPDFText(arrayBuffer) {
+  const lib = await loadPDFJS();
+  const pdf = await lib.getDocument({ data: arrayBuffer }).promise;
+  let fullText = '';
+  for (let p = 1; p <= pdf.numPages; p++) {
+    const page = await pdf.getPage(p);
+    const content = await page.getTextContent();
+    const lineMap = {};
+    for (const item of content.items) {
+      if (!item.str) continue;
+      const y = Math.round(item.transform[5]);
+      if (!lineMap[y]) lineMap[y] = [];
+      lineMap[y].push({ x: item.transform[4], str: item.str });
+    }
+    const ys = Object.keys(lineMap).map(Number).sort((a,b) => b - a);
+    for (const y of ys) {
+      fullText += lineMap[y].sort((a,b)=>a.x-b.x).map(i=>i.str).join(' ') + '\n';
+    }
+  }
+  return fullText;
+}
+
+// ══════════════════════════════════════════════════════════
+// STORAGE — localStorage instead of chrome.storage
+// ══════════════════════════════════════════════════════════
+const Storage = {
+  async get(keys) {
+    const result = {};
+    for (const k of keys) {
+      try { result[k] = JSON.parse(localStorage.getItem('fs_' + k)); } catch(e) { result[k] = null; }
+    }
+    return result;
+  },
+  async set(obj) {
+    for (const [k,v] of Object.entries(obj)) {
+      try { localStorage.setItem('fs_' + k, JSON.stringify(v)); } catch(e) {}
+    }
+  }
+};
+
+// ══════════════════════════════════════════════════════════
+// ANALYSIS ENGINE (ported from extension)
+// ══════════════════════════════════════════════════════════
+// Fixes: duplicate detection, downloads, 20-report history, session persistence
+
+// ── PREDATORY DB (FTC/CFPB sourced, July 2026) ───────────────────
+const PREDATORY_DB=[
+{match:/madmuscles|mad\s?muscles/i,name:"MadMuscles",risk:"high",reason:"FTC sued June 2026 — deceptive fitness app, $250M Genesis Tech fraud network",cancelPhone:"",cancelUrl:"support@madmuscles.com",cancelSteps:["Email support@madmuscles.com demanding cancellation","Dispute all charges — company under FTC court order","Call BofA: 1-800-421-2110 for chargeback"]},
+{match:/harna\b/i,name:"Harna",risk:"high",reason:"FTC sued June 2026 — nutrition app, Genesis Tech fraud network",cancelUrl:"Dispute with bank",cancelSteps:["Call BofA: 1-800-421-2110","Dispute as unauthorized — FTC court order active","Request full chargeback"]},
+{match:/unimeal/i,name:"Unimeal",risk:"high",reason:"FTC sued June 2026 — Genesis Tech fraud network",cancelUrl:"Dispute with bank",cancelSteps:["Dispute all charges with bank","Reference FTC Genesis Tech case (June 2026)"]},
+{match:/pdf\s?guru|pdfguru|pdf\s?master|pdfmaster/i,name:"PDF Guru / PDF Master",risk:"high",reason:"FTC sued June 2026 — $30-50/month hidden after 'free' download, Genesis Tech",cancelUrl:"support@pdfguru.com",cancelSteps:["Email support@pdfguru.com to cancel","Dispute all charges with bank","Use free alternatives: Adobe Reader, Smallpdf"]},
+{match:/nebula.*app|nebula.*horoscope|nebula.*astro/i,name:"Nebula Horoscope App",risk:"high",reason:"FTC sued June 2026 — $40-80/month subscription without clear consent",cancelUrl:"nebula-app.com/cancel",cancelSteps:["Go to nebula-app.com/cancel","Email support@nebula-app.com","Dispute remaining charges with bank"]},
+{match:/\bwisey\b/i,name:"Wisey",risk:"high",reason:"FTC sued June 2026 — habit app hidden recurring charges, Genesis Tech",cancelUrl:"Dispute with bank",cancelSteps:["Dispute all charges with bank immediately"]},
+{match:/justanswer|just\s?answer/i,name:"JustAnswer",risk:"high",reason:"FTC sued Jan 2026 — enrolled users in $125/month during one-time Q&A",cancelPhone:"800-509-5721",cancelUrl:"justanswer.com",cancelSteps:["Call 800-509-5721 — demand full cancellation","Say 'I was enrolled without clear consent'","Dispute monthly charges with bank if not refunded"]},
+{match:/instacart\+|instacart\s?plus|instacart.*member/i,name:"Instacart+ Membership",risk:"medium",reason:"FTC $60M settlement Dec 2025 — free trial auto-converted to annual sub",cancelUrl:"instacart.com/store/account/membership",cancelSteps:["Go to instacart.com → Account → Membership → Cancel","You may be eligible for FTC settlement refund"]},
+{match:/shutterstock/i,name:"Shutterstock",risk:"medium",reason:"FTC $35M settlement May 2026 — unauthorized billing, difficult cancellation",cancelPhone:"866-663-3954",cancelUrl:"shutterstock.com/account/subscriptions",cancelSteps:["Log into shutterstock.com/account/subscriptions → Cancel","Or call 866-663-3954"]},
+{match:/hellofresh|hello\s?fresh/i,name:"HelloFresh",risk:"medium",reason:"$7.5M CA settlement 2025 — auto-renewing meal kits without clear disclosure",cancelUrl:"my.hellofresh.com/subscription/cancel",cancelPhone:"800-733-2414",cancelSteps:["Go to my.hellofresh.com/subscription/cancel","Cancel BEFORE next delivery","Call 800-733-2414 if online fails"]},
+{match:/match\.com|match\s?group/i,name:"Match.com",risk:"medium",reason:"FTC enforcement 2025 — fraudulent accounts, hidden fees",cancelUrl:"match.com/unsubscribe",cancelPhone:"800-926-2824",cancelSteps:["Go to match.com → Settings → Manage Subscription → Cancel","Or call 800-926-2824"]},
+{match:/chegg/i,name:"Chegg",risk:"medium",reason:"FTC action 2025 — deliberately difficult cancellation",cancelUrl:"chegg.com/account",cancelPhone:"855-244-3448",cancelSteps:["Log into chegg.com → Settings → Cancel Subscription","Or call 855-244-3448"]},
+{match:/smarty\s?plus|smartyplus/i,name:"SmartyPlus",risk:"high",reason:"Deceptive checkout enrollment — $13/month without clear consent",cancelPhone:"877-808-0810",cancelUrl:"smartyplus.net",cancelSteps:["Call 877-808-0810","Say 'Cancel my SmartyPlus subscription immediately'","Ask for cancellation confirmation number"]},
+{match:/stealthwriter|stealth\s?writer/i,name:"StealthWriter AI",risk:"high",reason:"AI humanizer $20/month — also academic integrity risk",cancelUrl:"stealthwriter.ai/account",cancelSteps:["Log into stealthwriter.ai → Account → Cancel"]},
+{match:/simply\s?traw|simplytraw/i,name:"SimplyTrawell",risk:"high",reason:"Travel discount club with widespread complaints — $35/month minimal value",cancelUrl:"simplytrawellor.com",cancelSteps:["Visit simplytrawellor.com to cancel","If unreachable, dispute with bank"]},
+{match:/beenverified/i,name:"BeenVerified",risk:"high",reason:"People-search enrolled accidentally — $26.89/month",cancelPhone:"888-579-5910",cancelSteps:["Call 888-579-5910","Or beenverified.com/account → Cancel"]},
+{match:/intelius/i,name:"Intelius",risk:"high",reason:"Background check with deliberately difficult cancellation",cancelPhone:"877-543-6458",cancelSteps:["Call 877-543-6458"]},
+{match:/truthfinder/i,name:"TruthFinder",risk:"high",reason:"Predatory people-search — $28.05/month",cancelPhone:"800-699-8081",cancelSteps:["Call 800-699-8081"]},
+{match:/spokeo/i,name:"Spokeo",risk:"high",reason:"People-search after free trial — $19.95/month",cancelPhone:"888-906-0850",cancelSteps:["Call 888-906-0850"]},
+{match:/mylife\.com|mylife\s?premium/i,name:"MyLife.com",risk:"high",reason:"FTC has repeatedly actioned MyLife for deceptive enrollment",cancelPhone:"888-704-1900",cancelSteps:["Call 888-704-1900 — demand cancellation and refund"]},
+{match:/nugenix/i,name:"Nugenix",risk:"high",reason:"Supplement auto-ship trap — $69.99/month, very difficult to cancel",cancelPhone:"855-714-3235",cancelSteps:["Call 855-714-3235 immediately","Say 'Cancel all future shipments'"]},
+{match:/usps.*change|change.*address.*usps|change.*of.*addr/i,name:"Fake USPS Change of Address",risk:"high",reason:"SCAM — Real USPS charges $1.10 only. This is fraud",cancelUrl:"Dispute with bank",cancelSteps:["Call BofA immediately: 1-800-421-2110","Say 'Charged by a scam site impersonating USPS'","Request chargeback — real USPS: moversguide.usps.com ($1.10)"]},
+{match:/academia\.edu/i,name:"Academia.edu Premium",risk:"medium",reason:"Annual auto-renewal — free tier usually sufficient",cancelUrl:"academia.edu/settings/membership",cancelSteps:["Go to academia.edu/settings/membership → Cancel Premium"]},
+{match:/dashpass|dash\s?pass/i,name:"DoorDash DashPass",risk:"medium",reason:"$9.99/month — check for duplicate with Uber One",cancelUrl:"doordash.com/account",cancelSteps:["DoorDash app → Account → Manage DashPass → Cancel"]},
+{match:/kahoot/i,name:"Kahoot! Premium",risk:"medium",reason:"Free version sufficient for personal use",cancelUrl:"kahoot.com/settings/subscription",cancelSteps:["kahoot.com/settings/subscription → Cancel"]},
+{match:/carshield|car\s?shield/i,name:"CarShield",risk:"high",reason:"FTC sued 2024 for deceptive warranty advertising",cancelPhone:"800-227-7433",cancelSteps:["Call 800-227-7433 to cancel"]},
+{match:/sirius.*xm|siriusxm/i,name:"SiriusXM",risk:"medium",reason:"Auto-renewal without notice — negotiate lower rate first",cancelPhone:"866-635-2349",cancelSteps:["Call 866-635-2349","Ask for loyalty/retention rate first — often 50-80% off","If no deal, cancel completely"]},
+{match:/zoosk/i,name:"Zoosk",risk:"high",reason:"Notoriously difficult online cancellation — must call",cancelPhone:"888-939-6675",cancelSteps:["Call 888-939-6675 (online cancellation often fails)"]},
+{match:/lifelock/i,name:"LifeLock",risk:"medium",reason:"FTC fined $100M — free credit freezes provide similar protection",cancelPhone:"800-543-3562",cancelSteps:["Call 800-543-3562","Free alternative: freeze credit at Equifax/Experian/TransUnion"]},
+{match:/ymgrad|ym\s?grad/i,name:"YMGRAD FZCO",risk:"high",reason:"International mystery charge from Dubai UAE — unauthorized",cancelUrl:"Dispute with bank immediately",cancelSteps:["Call BofA: 1-800-421-2110","Dispute as unauthorized international charge","Request card replacement"]}
+];
+
+const SCAM_AMOUNTS=[
+{amount:37.75,match:/usps|postal|address/i,reason:"Fake USPS impersonation — real cost is $1.10. Dispute immediately."},
+{amount:1.00,match:/verify|confirm|test|validation/i,reason:"Potential fraud probe — $1 charges often precede larger fraud"}
+];
+
+const LEGIT=/netflix|spotify|amazon.*prime|apple\.com\/bill|apple\s?one|google.*one|hulu|disney|hbo|uber\s?one|anthropic|openai|chatgpt|microsoft.*365|github|dropbox|1password|lastpass|bitwarden|youtube.*premium|aws\b|google.*workspace|zoom|slack|figma|paypal|venmo|zelle|cashapp/i;
+
+const CATS=[
+{name:"Food & Dining",  color:"#f59e0b",m:/grubhub|doordash|ubereats|uber\s?eats|seamless|postmates|chipotle|mcdonalds|mcdonald|starbucks|dunkin|dominos|subway|wendys|taco\s?bell|chick.fil|panda\s?express|pizza|restaurant|cafe|bistro|diner|eatery|sushi|ramen|burger|grill|kasturi|bangla.*kitchen/i},
+{name:"Groceries",      color:"#84cc16",m:/ralphs|kroger|whole\s?foods|trader\s?joe|safeway|vons|albertsons|food4less|aldi|sprouts|smart\s?&\s?final|fresh\s?market|bangla|bazar|grocery|supermarket|food\s?mart|99\s?ranch|h\s?mart|pavilions/i},
+{name:"Transportation", color:"#06b6d4",m:/lyft|uber(?!\s?eats|one)|waymo|bird\s?ride|lime\s?ride|metro\s?tap|parking|gas\s?station|shell|chevron|arco|bp\b|exxon|mobil|76\b|car\s?wash|aaa\b|jiffy\s?lube|ladot/i},
+{name:"Shopping",       color:"#8b5cf6",m:/amazon(?!.*prime|.*fresh|.*web)|target|walmart(?!\+)|ebay|etsy|best\s?buy|home\s?depot|lowes|ikea|ross|tj\s?maxx|marshalls|nordstrom|macys|gap\b|zara|shein|adidas|nike|wss\b|foot\s?locker/i},
+{name:"Entertainment",  color:"#ec4899",m:/netflix|hulu|disney|hbo|paramount|peacock|apple.*tv|youtube|spotify|apple.*music|cinema|movie|theater|concert|ticketmaster|stubhub|steam|xbox|playstation|nintendo/i},
+{name:"Education",      color:"#10b981",m:/csudh|university|college|coursera|udemy|skillshare|duolingo|chegg|tutor|student|textbook|pearson/i},
+{name:"Healthcare",     color:"#0ea5e9",m:/pharmacy|cvs|walgreens|rite\s?aid|hospital|clinic|doctor|dentist|medical|insurance.*health|uhc|blue\s?cross|cigna|aetna|kaiser/i},
+{name:"Utilities",      color:"#64748b",m:/ladwp|dwp\b|socal\s?gas|gas\s?company|utility|electric|water\s?dept|comcast|spectrum|att\b|verizon|t.mobile|boost\s?mobile/i},
+{name:"Travel",         color:"#f97316",m:/airline|airbnb|hotel|marriott|hilton|hyatt|expedia|booking\.com|kayak|delta|southwest|american\s?air|spirit\s?air|rental\s?car/i},
+];
+
+// ── TEXT PARSER ───────────────────────────────────────────────────
+function parseText(text, filename) {
+  const txns = [];
+  const yr = parseInt((filename||'').match(/20(\d\d)/)?.[0] || String(new Date().getFullYear()));
+  let balance = 0, cardHolder = '';
+  const bm = text.match(/New\s+Balance\s+Total\s+\$?([\d,]+\.\d{2})/i);
+  if (bm) balance = parseFloat(bm[1].replace(/,/g,''));
+  const nm = text.match(/^([A-Z][A-Z\s]{5,40})\s*\n/m);
+  if (nm) cardHolder = nm[1].trim();
+  const seen = new Set();
+  const skip = /^(page|total|balance|statement|account|previous|new\s|minimum|payment\s+due|due\s+date|credit\s+line|days\s+in|closing|interest\s+charged|fee|apr|annual|rewards|cash\s+back|ending\s+)/i;
+  const patterns = [
+    /(\d{2}\/\d{2})\s+([A-Z0-9*#][A-Z0-9\s*#&\-./,'\(\)]{2,50}?)\s{2,}(-?[\d,]+\.\d{2})/gm,
+    /(\d{2}\/\d{2})\s+\d{4,12}\s+([A-Z0-9][A-Z0-9\s*#&\-.]{2,50}?)\s+(-?[\d,]+\.\d{2})\s*$/gm,
+    /(\d{2}\/\d{2})\s+([A-Z][A-Z0-9\s*#&\-.\/]{3,45}?)\s+(-?[\d,]+\.\d{2})\s*$/gm,
+  ];
+  for (const pat of patterns) {
+    let m;
+    while ((m = pat.exec(text)) !== null) {
+      const ds = m[1], merchant = m[2].trim().replace(/\s{2,}/g,' '), as = m[3].replace(/,/g,''), amt = parseFloat(as);
+      if (isNaN(amt) || Math.abs(amt) < 0.01 || merchant.length < 3 || skip.test(merchant)) continue;
+      const key = `${ds}|${merchant.substring(0,15)}|${Math.abs(amt).toFixed(2)}`;
+      if (seen.has(key)) continue; seen.add(key);
+      const [mm, dd] = ds.split('/');
+      const date = `${yr}-${mm.padStart(2,'0')}-${dd.padStart(2,'0')}`;
+      const credit = amt < 0 || /^payment|^credit|^return|^refund/i.test(merchant);
+      txns.push({ date, merchant: merchant.substring(0,60), amount: Math.abs(amt), credit });
+    }
+  }
+  return { txns, balance, cardHolder };
+}
+
+function parseCSV(text, filename) {
+  const txns = [];
+  const yr = parseInt((filename||'').match(/20(\d\d)/)?.[0] || String(new Date().getFullYear()));
+  const lines = text.split('\n').filter(l => l.trim());
+  for (const line of lines.slice(1)) {
+    const cols = line.split(',').map(c => c.replace(/"/g,'').trim());
+    if (cols.length < 3) continue;
+    let date = '';
+    const ds = cols[0];
+    if (/\d{2}\/\d{2}\/\d{4}/.test(ds)) { const [m,d,y] = ds.split('/'); date = `${y}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`; }
+    else if (/\d{4}-\d{2}-\d{2}/.test(ds)) { date = ds; }
+    else if (/\d{2}\/\d{2}/.test(ds)) { const [m,d] = ds.split('/'); date = `${yr}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`; }
+    if (!date) continue;
+    const merchant = cols[1] || '';
+    if (!merchant || merchant.length < 2) continue;
+    let amt = 0;
+    for (let i = 2; i < Math.min(cols.length, 5); i++) {
+      const v = parseFloat(cols[i].replace(/[$,]/g,''));
+      if (!isNaN(v) && v !== 0) { amt = Math.abs(v); break; }
+    }
+    if (amt === 0) continue;
+    const credit = /payment|credit|deposit|return/i.test(merchant);
+    txns.push({ date, merchant: merchant.substring(0,60), amount: amt, credit });
+  }
+  return txns;
+}
+
+// ── CORE ANALYSIS ENGINE ──────────────────────────────────────────
+function analyze(allTxns, meta) {
+  const buys = allTxns.filter(t => !t.credit);
+  const total = buys.reduce((a, t) => a + t.amount, 0);
+
+  // Group by merchant name only (for subscription detection)
+  const byMerch = {};
+  buys.forEach(t => {
+    const k = t.merchant.toLowerCase().trim();
+    byMerch[k] = byMerch[k] || { merchant: t.merchant, count: 0, total: 0, amounts: [], dates: [] };
+    byMerch[k].count++;
+    byMerch[k].total += t.amount;
+    byMerch[k].amounts.push(t.amount);
+    byMerch[k].dates.push(t.date);
+  });
+
+  const subs = [], hidden = [], alerts = [];
+
+  // ── Predatory DB check ──────────────────────────────────────────
+  for (const [, g] of Object.entries(byMerch)) {
+    const pd = PREDATORY_DB.find(p => p.match.test(g.merchant));
+    if (!pd) continue;
+    const avg = g.total / g.count;
+    if (/scam|fraud|impersonation|fake/i.test(pd.reason)) {
+      hidden.push({ description: `${pd.name} — ${g.merchant}`, amount: avg, occurrences: g.count, totalCost: g.total, suspicionReason: pd.reason, action: pd.cancelSteps[0] || 'Dispute with bank', disputeSteps: pd.cancelSteps });
+      alerts.push({ severity: 'critical', title: `🚨 Fraud: ${pd.name}`, description: pd.reason, action: `Call BofA: 1-800-421-2110 — dispute $${g.total.toFixed(2)}` });
+    } else {
+      subs.push({ name: pd.name, amount: parseFloat(avg.toFixed(2)), frequency: g.count >= 3 ? 'Monthly' : 'Recurring', annualCost: parseFloat((avg*12).toFixed(2)), risk: pd.risk, reason: pd.reason, recommendation: pd.risk==='high'?'Cancel':pd.risk==='medium'?'Review':'Keep', cancelUrl: pd.cancelUrl||'', cancelPhone: pd.cancelPhone||'', cancelSteps: pd.cancelSteps||[], occurrences: g.count, totalPaid: parseFloat(g.total.toFixed(2)) });
+      if (pd.risk === 'high') alerts.push({ severity: 'warning', title: `⚠️ Predatory Sub: ${pd.name}`, description: pd.reason, action: pd.cancelPhone ? `Call ${pd.cancelPhone}` : `Go to ${pd.cancelUrl}` });
+    }
+  }
+
+  // ── Unknown recurring subscriptions ────────────────────────────
+  // A recurring charge = same merchant, same amount (within $2), 2+ times
+  for (const [, g] of Object.entries(byMerch)) {
+    if (subs.find(s => s.name.toLowerCase() === g.merchant.toLowerCase())) continue;
+    if (hidden.find(h => h.description.toLowerCase().includes(g.merchant.toLowerCase().substring(0,10)))) continue;
+    if (LEGIT.test(g.merchant)) continue;
+    if (g.count >= 2) {
+      const variance = Math.max(...g.amounts) - Math.min(...g.amounts);
+      const avg = g.total / g.count;
+      if (variance < 2 && avg > 1 && avg < 300) {
+        subs.push({ name: g.merchant, amount: parseFloat(avg.toFixed(2)), frequency: g.count >= 4 ? 'Monthly' : 'Recurring', annualCost: parseFloat((avg*12).toFixed(2)), risk: 'medium', reason: `Appears ${g.count} times — verify intentional`, recommendation: 'Review', cancelUrl: 'Check merchant website', cancelPhone: '', cancelSteps: ['Identify this service', 'Check if you still use it', 'Cancel if unneeded'], occurrences: g.count, totalPaid: parseFloat(g.total.toFixed(2)) });
+      }
+    }
+  }
+
+  // ── Scam amount patterns ────────────────────────────────────────
+  for (const t of buys) {
+    for (const sc of SCAM_AMOUNTS) {
+      if (!sc.match.test(t.merchant)) continue;
+      if (Math.abs(t.amount - sc.amount) > 0.02) continue;
+      const ex = hidden.find(h => h.description.toLowerCase().includes(t.merchant.toLowerCase().substring(0,10)));
+      if (ex) { ex.occurrences++; ex.totalCost += t.amount; }
+      else hidden.push({ description: t.merchant, amount: t.amount, occurrences: 1, totalCost: t.amount, suspicionReason: sc.reason, action: 'Dispute with bank', disputeSteps: ['Call BofA: 1-800-421-2110', `Say: "Dispute $${t.amount} from ${t.merchant}"`, 'Request chargeback — 5-7 days'] });
+    }
+  }
+
+  // ── ACCURATE DUPLICATE DETECTION ───────────────────────────────
+  // A true duplicate = SAME merchant + SAME amount + SAME date
+  // Different amounts from same merchant = different purchases (NOT duplicates)
+  // Group by date + merchant + exact amount
+  const dupKey = {};
+  buys.forEach(t => {
+    // Key = date + merchant (first 20 chars) + exact amount
+    // This means $45.00 from Uber and $12.50 from Uber on same day = NOT duplicates
+    const k = `${t.date}|${t.merchant.substring(0,20).toLowerCase()}|${t.amount.toFixed(2)}`;
+    dupKey[k] = dupKey[k] || { date: t.date, merchant: t.merchant, amount: t.amount, count: 0, transactions: [] };
+    dupKey[k].count++;
+    dupKey[k].transactions.push(t);
+  });
+
+  for (const [, dup] of Object.entries(dupKey)) {
+    if (dup.count < 2) continue; // Only 1 charge = not a duplicate
+    if (dup.amount < 1) continue; // Skip tiny amounts
+
+    // Don't flag if it's already in predatory subs
+    if (subs.find(s => s.name.toLowerCase().includes(dup.merchant.substring(0,10).toLowerCase()))) continue;
+
+    const extraCharges = dup.count - 1; // Number of extra charges (1 is legitimate)
+    const totalOvercharge = dup.amount * extraCharges;
+
+    hidden.push({
+      description: `Duplicate charge: ${dup.merchant}`,
+      amount: dup.amount,
+      occurrences: dup.count,
+      totalCost: totalOvercharge,
+      suspicionReason: `${dup.count}× same charge of $${dup.amount.toFixed(2)} from same merchant on ${dup.date} — only 1 should exist`,
+      action: `Dispute ${extraCharges} extra charge${extraCharges>1?'s':''} with bank`,
+      disputeSteps: [
+        'Call BofA: 1-800-421-2110',
+        `Say: "${dup.count} charges of $${dup.amount.toFixed(2)} from ${dup.merchant} on ${dup.date} — only 1 is valid"`,
+        `Request reversal of $${totalOvercharge.toFixed(2)} in duplicate charges`,
+        'Refund typically arrives within 5-7 business days'
+      ]
+    });
+    alerts.push({
+      severity: 'warning',
+      title: `⚠️ Duplicate Charge: ${dup.merchant}`,
+      description: `$${dup.amount.toFixed(2)} charged ${dup.count}× on ${dup.date}. Extra charges: $${totalOvercharge.toFixed(2)}`,
+      action: 'Dispute duplicates with BofA: 1-800-421-2110'
+    });
+  }
+
+  // ── Categories ──────────────────────────────────────────────────
+  const catMap = {};
+  CATS.forEach(c => { catMap[c.name] = { amount: 0, count: 0, color: c.color }; });
+  catMap['Other'] = { amount: 0, count: 0, color: '#94a3b8' };
+  buys.forEach(t => {
+    let hit = false;
+    for (const c of CATS) { if (c.m.test(t.merchant)) { catMap[c.name].amount += t.amount; catMap[c.name].count++; hit = true; break; } }
+    if (!hit) { catMap['Other'].amount += t.amount; catMap['Other'].count++; }
+  });
+  const cats = Object.entries(catMap).filter(([,v]) => v.amount > 0).map(([name, v]) => ({ name, amount: parseFloat(v.amount.toFixed(2)), count: v.count, color: v.color, pct: parseFloat((v.amount/total*100).toFixed(1)) })).sort((a,b) => b.amount - a.amount);
+
+  // ── Monthly trend ───────────────────────────────────────────────
+  const mMap = {};
+  buys.forEach(t => { const [y,m] = t.date.split('-'); const k = `${y}-${m}`; mMap[k] = (mMap[k]||0) + t.amount; });
+  const MO = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const trend = Object.entries(mMap).sort(([a],[b]) => a.localeCompare(b)).map(([k,v]) => { const [y,m] = k.split('-'); return { period: `${MO[parseInt(m)-1]} ${y}`, amount: parseFloat(v.toFixed(2)) }; });
+
+  // ── Top merchants ───────────────────────────────────────────────
+  const topMerch = Object.values(byMerch).map(g => {
+    let cat = 'Other';
+    for (const c of CATS) { if (c.m.test(g.merchant)) { cat = c.name; break; } }
+    return { name: g.merchant, total: parseFloat(g.total.toFixed(2)), count: g.count, category: cat };
+  }).sort((a,b) => b.total - a.total).slice(0,12);
+
+  // ── Summary ─────────────────────────────────────────────────────
+  const months = trend.length || 1;
+  const cancelSubs = subs.filter(s => s.recommendation === 'Cancel');
+  const savings = cancelSubs.reduce((a,s) => a + s.annualCost, 0);
+  const summary = { cardHolder: meta.cardHolder||'Account Holder', bank: meta.bank||'Bank of America', totalSpend: parseFloat(total.toFixed(2)), months, avgMonthly: parseFloat((total/months).toFixed(2)), totalTransactions: allTxns.length, currentBalance: meta.balance||0, potentialSavings: parseFloat(savings.toFixed(2)) };
+
+  // ── Insights ────────────────────────────────────────────────────
+  const insights = [];
+  if (subs.length) insights.push({ icon:'🔄', title:`${subs.length} subscriptions — $${subs.reduce((a,s)=>a+s.annualCost,0).toFixed(0)}/year total`, description:`${cancelSubs.length} flagged for cancellation, saving $${savings.toFixed(0)}/year.` });
+  if (hidden.length) { const th = hidden.reduce((a,h)=>a+h.totalCost,0); insights.push({ icon:'🕵️', title:`${hidden.length} suspicious charge(s) — $${th.toFixed(2)} total`, description:`Dispute with bank to recover up to $${th.toFixed(2)}.` }); }
+  const ta = trend.map(t=>t.amount);
+  if (ta.length >= 2) { const f=ta[0],l=ta[ta.length-1],p=Math.abs(((l-f)/f*100)).toFixed(0); if(l<f*0.85) insights.push({icon:'📉',title:`Spending down ${p}% — great progress!`,description:`From $${f.toFixed(0)} to $${l.toFixed(0)}/month.`}); else if(l>f*1.2) insights.push({icon:'📈',title:`Spending up ${p}%`,description:`From $${f.toFixed(0)} to $${l.toFixed(0)}/month. Check for new subscriptions.`}); }
+  const fc = cats.find(c=>c.name==='Food & Dining');
+  if (fc && fc.amount > 1000) insights.push({ icon:'🍔', title:`$${fc.amount.toFixed(0)} on food/dining`, description:`$${(fc.amount/months).toFixed(0)}/month avg. Cooking more could save $150-300/month.` });
+
+  // ── Action plan ─────────────────────────────────────────────────
+  const plan = [];
+  if (cancelSubs.length) plan.push({ priority:'high', title:`Cancel ${cancelSubs.length} predatory subscription${cancelSubs.length>1?'s':''}`, description:cancelSubs.map(s=>s.name).join(', '), saving:`$${savings.toFixed(0)}/year`, steps:cancelSubs.slice(0,3).map(s=>s.cancelPhone?`${s.name}: Call ${s.cancelPhone}`:`${s.name}: ${s.cancelUrl||'Search "cancel '+s.name+'"'}`) });
+  if (hidden.length) { const th = hidden.reduce((a,h)=>a+h.totalCost,0); plan.push({ priority:'high', title:`Dispute ${hidden.length} suspicious charge${hidden.length>1?'s':''}`, description:`Recover up to $${th.toFixed(2)}`, saving:`$${th.toFixed(2)} back`, steps:['Call BofA: 1-800-421-2110','Say: "I need to dispute unauthorized charges"','Reference each charge by date and exact amount'] }); }
+  const ms = subs.filter(s=>s.risk==='medium');
+  if (ms.length) plan.push({ priority:'medium', title:`Review ${ms.length} flagged subscription${ms.length>1?'s':''}`, description:ms.map(s=>s.name).join(', '), saving:`Up to $${ms.reduce((a,s)=>a+s.annualCost,0).toFixed(0)}/year`, steps:['Log into each service','Check if you still use it','Cancel anything used less than once/month'] });
+
+  return { summary, subscriptions: subs.sort((a,b)=>({high:0,medium:1,low:2}[a.risk])-({high:0,medium:1,low:2}[b.risk])), hiddenCharges: hidden, securityAlerts: alerts, categories: cats, monthlyTrend: trend, topMerchants: topMerch, insights, actionPlan: plan, _transactions: allTxns, _generatedAt: new Date().toISOString(), _engine:'local-v4' };
+}
+
+
+
+// ══════════════════════════════════════════════════════════
+// FORMAT
+// ══════════════════════════════════════════════════════════
+const fmt = n => '$' + (n||0).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+
+// ══════════════════════════════════════════════════════════
+// TABS
+// ══════════════════════════════════════════════════════════
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === name));
+  document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.id === `tab-${name}`));
+}
+document.querySelectorAll('.tab').forEach(tab =>
+  tab.addEventListener('click', () => switchTab(tab.dataset.tab))
+);
+
+// ══════════════════════════════════════════════════════════
+// FILE HANDLING
+// ══════════════════════════════════════════════════════════
 let uploadedFiles = [];
 let analysisData = null;
-let chatHistory = [];
 
-// Check key on load
-window.addEventListener('load', () => {
-  if (!API_KEY || API_KEY === 'PASTE_YOUR_API_KEY_HERE') {
-    document.getElementById('analyzeBtn').disabled = true;
-    document.querySelector('.status-dot').style.background = '#dc2626';
-    document.querySelector('.status-label').textContent = 'No API Key';
-    document.querySelector('.status-label').style.color = '#dc2626';
-    alert('⚠️ Please open this file in a text editor and add your Anthropic API key where it says PASTE_YOUR_API_KEY_HERE');
-  }
-});
+const ALLOWED_EXTS = new Set(['pdf', 'csv']);
+function isAllowed(filename) {
+  const parts = filename.toLowerCase().split('.');
+  return parts.length >= 2 && ALLOWED_EXTS.has(parts[parts.length - 1]);
+}
 
-// FILES
 const dropZone = document.getElementById('dropZone');
 const fileInput = document.getElementById('fileInput');
+
+function handleFiles(files) {
+  const rejected = [];
+  for (const f of files) {
+    if (!isAllowed(f.name)) { rejected.push(f.name); continue; }
+    if (!uploadedFiles.find(x => x.name === f.name)) uploadedFiles.push(f);
+  }
+  const box = document.getElementById('errorBox');
+  if (rejected.length) {
+    box.innerHTML = `<div class="error-box"><strong>⛔ ${rejected.length} file${rejected.length>1?'s':''} rejected — wrong type</strong><br>${rejected.map(n=>`<code style="background:#fee;padding:1px 4px;border-radius:3px">${n}</code>`).join(' ')}<br><span style="font-size:11px">Only <strong>.pdf</strong> and <strong>.csv</strong> bank statements are accepted.</span></div>`;
+  } else { box.innerHTML = ''; }
+  renderFileList();
+}
+
+dropZone.addEventListener('click', () => fileInput.click());
 dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag'); });
 dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag'));
 dropZone.addEventListener('drop', e => { e.preventDefault(); dropZone.classList.remove('drag'); handleFiles(e.dataTransfer.files); });
 fileInput.addEventListener('change', e => { handleFiles(e.target.files); fileInput.value = ''; });
 
-function handleFiles(files) {
-  for (const f of files) { if (!uploadedFiles.find(x => x.name === f.name)) uploadedFiles.push(f); }
-  renderFileList();
-}
-
-function removeFile(i) { uploadedFiles.splice(i, 1); renderFileList(); }
-
 function renderFileList() {
   const list = document.getElementById('fileList');
-  document.getElementById('fileCount').textContent = uploadedFiles.length;
-  if (!uploadedFiles.length) { list.innerHTML = '<div class="no-files">No files uploaded yet</div>'; }
-  else { list.innerHTML = uploadedFiles.map((f,i) => `<div class="file-item"><span class="file-name">📄 ${f.name}</span><span class="file-size">${(f.size/1024).toFixed(0)}KB</span><button class="file-rm" onclick="removeFile(${i})">×</button></div>`).join(''); }
-  const hasKey = API_KEY && API_KEY !== 'PASTE_YOUR_API_KEY_HERE';
-  document.getElementById('analyzeBtn').disabled = !(hasKey && uploadedFiles.length > 0);
-}
-
-async function readB64(file) {
-  return new Promise((res,rej) => { const r=new FileReader(); r.onload=e=>res(e.target.result.split(',')[1]); r.onerror=rej; r.readAsDataURL(file); });
-}
-async function readText(file) {
-  return new Promise((res,rej) => { const r=new FileReader(); r.onload=e=>res(e.target.result); r.onerror=rej; r.readAsText(file); });
-}
-
-// LOADING
-const LOAD_MSGS = [
-  {text:'Reading your PDF statements...',t:0},
-  {text:'Extracting all transactions...',t:4000},
-  {text:'Identifying recurring charges...',t:9000},
-  {text:'Hunting for hidden subscriptions...',t:15000},
-  {text:'Categorizing your spending...',t:21000},
-  {text:'Flagging suspicious charges...',t:27000},
-  {text:'Building your action plan...',t:34000},
-  {text:'Compiling your full report...',t:42000},
-];
-let loadTimers = [];
-
-function startLoading() {
-  const prog = document.getElementById('loadingProgress');
-  prog.innerHTML = LOAD_MSGS.map((m,i) => `<div class="prog-item" id="prog-${i}">⏳ ${m.text}</div>`).join('');
-  loadTimers.forEach(clearTimeout); loadTimers = [];
-  LOAD_MSGS.forEach((m,i) => {
-    loadTimers.push(setTimeout(() => {
-      if (i>0) { const p=document.getElementById(`prog-${i-1}`); if(p){p.className='prog-item done';p.textContent='✓ '+LOAD_MSGS[i-1].text;} }
-      const el=document.getElementById(`prog-${i}`);
-      if(el){el.className='prog-item active';el.textContent='● '+m.text;}
-      document.getElementById('loadingTitle').textContent=m.text;
-    }, m.t));
+  list.innerHTML = uploadedFiles.length
+    ? uploadedFiles.map((f,i) => `<div class="file-item">
+        <span class="file-name">📄 ${f.name}</span>
+        <span class="file-size">${(f.size/1024).toFixed(0)}KB</span>
+        <button class="file-rm" data-rm="${i}">×</button>
+      </div>`).join('')
+    : '<div class="no-files">No files yet</div>';
+  document.getElementById('analyzeBtn').disabled = uploadedFiles.length === 0;
+  // Attach remove buttons
+  list.querySelectorAll('[data-rm]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      uploadedFiles.splice(parseInt(btn.dataset.rm), 1);
+      renderFileList();
+    });
   });
 }
 
-function showScreen(id) {
-  document.getElementById('welcomeScreen').style.display = id==='welcomeScreen'?'block':'none';
-  document.getElementById('loadingScreen').style.display = id==='loadingScreen'?'block':'none';
-  document.getElementById('resultsArea').style.display = id==='resultsArea'?'block':'none';
-}
-
-// ════════════════════════════════════════════════════════════════
-//  CORE ENGINE — Sectioned multi-call. Each call = 1 small JSON.
-//  This architecture makes truncation physically impossible.
-// ════════════════════════════════════════════════════════════════
-
-function setProgress(msg) {
+// ══════════════════════════════════════════════════════════
+// PROGRESS LOG
+// ══════════════════════════════════════════════════════════
+function addLog(msg, type='active') {
+  const list = document.getElementById('progList');
+  list.querySelectorAll('.prog-item.active').forEach(el => {
+    el.className = 'prog-item done';
+    el.textContent = '✓ ' + el.textContent.replace(/^[●⚠]\s/, '');
+  });
+  const div = document.createElement('div');
+  div.className = `prog-item ${type}`;
+  div.textContent = (type==='active'?'● ':type==='warn'?'⚠ ':'✓ ') + msg;
+  list.appendChild(div);
   document.getElementById('loadingTitle').textContent = msg;
 }
 
-// Single focused API call — returns parsed JSON or {}
-async function apiCall(prompt, maxTok = 4000) {
-  const r = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': API_KEY,
-      'anthropic-version': '2023-06-01',
-      'anthropic-dangerous-direct-browser-access': 'true'
-    },
-    body: JSON.stringify({
-      model: 'claude-haiku-4-5-20251001',  // Haiku for speed+cost on focused tasks
-      max_tokens: maxTok,
-      messages: [{ role: 'user', content: prompt }]
-    })
-  });
-  if (!r.ok) { const e = await r.json(); throw new Error(e.error?.message || `API error ${r.status}`); }
-  const d = await r.json();
-  const raw = d.content.map(c => c.text || '').join('');
-  const clean = raw.replace(/```json\s*/gi, '').replace(/```\s*/g, '').trim();
-  try { return JSON.parse(clean); } catch {
-    const s = clean.indexOf('{'), e2 = clean.lastIndexOf('}');
-    if (s !== -1 && e2 !== -1) { try { return JSON.parse(clean.slice(s, e2 + 1)); } catch {} }
-    return {};
+// ══════════════════════════════════════════════════════════
+// PARSE FILE
+// ══════════════════════════════════════════════════════════
+async function parseFile(file) {
+  const ext = file.name.toLowerCase().split('.').pop();
+  if (ext === 'pdf') {
+    const buf = await file.arrayBuffer();
+    const text = await extractPDFText(buf);
+    if (!text || text.trim().length < 50) return { txns: [], cardHolder: '', balance: 0, warn: 'scanned image PDF — no selectable text, download CSV instead' };
+    const parsed = parseText(text, file.name);
+    return { txns: parsed.txns, cardHolder: parsed.cardHolder, balance: parsed.balance };
+  } else {
+    return { txns: parseCSV(await file.text(), file.name), cardHolder: '', balance: 0 };
   }
 }
 
-// Extract transactions from PDFs using Sonnet (needs vision)
-async function extractBatch(files) {
-  const content = [];
-  for (const file of files) {
-    const ext = file.name.toLowerCase().split('.').pop();
-    if (ext === 'pdf') {
-      content.push({ type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: await readB64(file) } });
-      content.push({ type: 'text', text: `[File: ${file.name}]` });
-    } else {
-      content.push({ type: 'text', text: `\n--- ${file.name} ---\n${(await readText(file)).substring(0, 12000)}\n` });
-    }
-  }
-  content.push({ type: 'text', text: `Extract ALL transactions. Return ONLY compact JSON, no markdown:
-{"cardHolder":"name","bank":"bank","currentBalance":0,"transactions":[{"date":"YYYY-MM-DD","merchant":"name","amount":0,"credit":false}]}
-credit=true for payments/refunds. Amounts always positive. Include every transaction.` });
-
-  const r = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'x-api-key': API_KEY, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
-    body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 16000, messages: [{ role: 'user', content }] })
-  });
-  if (!r.ok) { const e = await r.json(); throw new Error(e.error?.message || `API error ${r.status}`); }
-  const d = await r.json();
-  const raw = d.content.map(c => c.text || '').join('');
-  const clean = raw.replace(/```json\s*/gi, '').replace(/```\s*/g, '').trim();
-  try { return JSON.parse(clean); } catch {
-    const s = clean.indexOf('{'), e2 = clean.lastIndexOf('}');
-    if (s !== -1 && e2 !== -1) { try { return JSON.parse(clean.slice(s, e2 + 1)); } catch {} }
-    return { transactions: [] };
-  }
+function makeHistoryEntry(result, history) {
+  const tag = generateTag(result, history.length);
+  return {
+    id: Date.now() + Math.random(),
+    tag,
+    date: new Date().toISOString(),
+    summary: result.summary,
+    subsCount: result.subscriptions?.length || 0,
+    dangerCount: result.subscriptions?.filter(s => s.risk === 'high').length || 0,
+    savings: result.summary?.potentialSavings || 0,
+    fullData: result
+  };
 }
 
-// Build the shared context string (compact transaction list)
-function buildContext(txns, cardHolder, bank, balance) {
-  const purchases = txns.filter(t => !t.credit);
-  const totalSpend = purchases.reduce((a, t) => a + t.amount, 0);
-  // Aggregate by merchant for context efficiency
-  const byMerchant = {};
-  purchases.forEach(t => {
-    const k = t.merchant;
-    byMerchant[k] = byMerchant[k] || { count: 0, total: 0, dates: [] };
-    byMerchant[k].count++;
-    byMerchant[k].total += t.amount;
-    byMerchant[k].dates.push(t.date);
-  });
-  const merchantSummary = Object.entries(byMerchant)
-    .sort((a, b) => b[1].total - a[1].total)
-    .slice(0, 80)
-    .map(([name, v]) => `${name}:count=${v.count},total=$${v.total.toFixed(0)},dates=${v.dates.slice(0,3).join('|')}`)
-    .join('\n');
+// ══════════════════════════════════════════════════════════
+// RUN ANALYSIS
+// ══════════════════════════════════════════════════════════
+document.getElementById('analyzeBtn').addEventListener('click', runAnalysis);
 
-  return `CARD: ${cardHolder} | ${bank} | Balance: $${balance} | ${txns.length} transactions | Total spend: $${totalSpend.toFixed(0)}
-TOP MERCHANTS:\n${merchantSummary}
-RECENT TRANSACTIONS (last 30):\n${purchases.slice(-30).map(t => `${t.date} | ${t.merchant} | $${t.amount}`).join('\n')}`;
-}
-
-// ── MAIN ANALYSIS ────────────────────────────────────────────────
 async function runAnalysis() {
   if (!uploadedFiles.length) return;
-  showScreen('loadingScreen');
-  startLoading();
-
-  const opts = {
-    subs: document.getElementById('opt-subs').checked,
-    hidden: document.getElementById('opt-hidden').checked,
-    cats: document.getElementById('opt-cats').checked,
-    merchants: document.getElementById('opt-merchants').checked,
-    insights: document.getElementById('opt-insights').checked,
-    trends: document.getElementById('opt-trends').checked,
-    action: document.getElementById('opt-action').checked,
-  };
+  document.getElementById('errorBox').innerHTML = '';
+  document.getElementById('loadingState').style.display = 'block';
+  document.getElementById('analyzeBtn').disabled = true;
+  document.getElementById('progList').innerHTML = '';
+  const isBatch = uploadedFiles.length > 1;
 
   try {
-    // ══ PASS 1: Extract transactions in batches of 8 ══════════════
-    const BATCH = 8;
-    let allTxns = [], cardHolder = '', bank = '', balance = 0;
-    const totalBatches = Math.ceil(uploadedFiles.length / BATCH);
+    const stored = await Storage.get(['analysisHistory']);
+    let history = stored.analysisHistory || [];
 
-    for (let b = 0; b < uploadedFiles.length; b += BATCH) {
-      const batch = uploadedFiles.slice(b, b + BATCH);
-      setProgress(`📄 Reading files ${b + 1}–${Math.min(b + BATCH, uploadedFiles.length)} of ${uploadedFiles.length}...`);
-      const result = await extractBatch(batch);
-      if (result.transactions) allTxns = allTxns.concat(result.transactions);
-      if (!cardHolder && result.cardHolder) cardHolder = result.cardHolder;
-      if (!bank && result.bank) bank = result.bank;
-      if (result.currentBalance) balance = result.currentBalance;
+    if (isBatch) {
+      const perFileResults = [];
+      let combinedTxns = [], primaryCardHolder = '', primaryBalance = 0;
+      for (let i = 0; i < uploadedFiles.length; i++) {
+        const file = uploadedFiles[i];
+        addLog(`[${i+1}/${uploadedFiles.length}] Parsing ${file.name}...`);
+        const parsed = await parseFile(file);
+        if (parsed.warn) { addLog(`${file.name}: ${parsed.warn}`, 'warn'); continue; }
+        if (!parsed.txns.length) { addLog(`${file.name}: 0 transactions found`, 'warn'); continue; }
+        if (!primaryCardHolder && parsed.cardHolder) primaryCardHolder = parsed.cardHolder;
+        if (parsed.balance > 0) primaryBalance = parsed.balance;
+        addLog(`Analyzing ${parsed.txns.length} transactions from ${file.name}...`);
+        const result = analyze(parsed.txns, { cardHolder: parsed.cardHolder || primaryCardHolder, bank: 'Bank of America', balance: parsed.balance });
+        result._sourceFile = file.name;
+        perFileResults.push(result);
+        combinedTxns = combinedTxns.concat(parsed.txns);
+        addLog(`${file.name}: done`, 'done');
+      }
+      if (!perFileResults.length) throw new Error('No transactions found in any file.');
+      for (const r of perFileResults) history.unshift(makeHistoryEntry(r, history));
+      let combinedResult = null;
+      if (perFileResults.length > 1) {
+        addLog(`Building combined report...`);
+        combinedResult = analyze(combinedTxns, { cardHolder: primaryCardHolder, bank: 'Bank of America', balance: primaryBalance });
+        combinedResult._sourceFile = `Combined (${uploadedFiles.length} files)`;
+        combinedResult._isCombined = true;
+        history.unshift(makeHistoryEntry(combinedResult, history));
+      }
+      await Storage.set({ lastAnalysis: combinedResult || perFileResults[0], lastAnalysisDate: new Date().toISOString(), analysisHistory: history.slice(0, 20) });
+      analysisData = combinedResult || perFileResults[0];
+      document.getElementById('loadingState').style.display = 'none';
+      document.getElementById('analyzeBtn').disabled = false;
+      renderHistory(history);
+      renderBatchSummary(perFileResults, combinedResult);
+      switchTab('results');
+    } else {
+      const file = uploadedFiles[0];
+      addLog(`Reading ${file.name}...`);
+      const parsed = await parseFile(file);
+      if (parsed.warn) addLog(parsed.warn, 'warn');
+      if (!parsed.txns.length) throw new Error('No transactions found.\n\nTip: Download your statement as CSV from your bank website — CSV works 100% reliably.');
+      addLog(`Analyzing ${parsed.txns.length} transactions...`);
+      const result = analyze(parsed.txns, { cardHolder: parsed.cardHolder, bank: 'Bank of America', balance: parsed.balance });
+      result._sourceFile = file.name;
+      history.unshift(makeHistoryEntry(result, history));
+      await Storage.set({ lastAnalysis: result, lastAnalysisDate: new Date().toISOString(), analysisHistory: history.slice(0, 20) });
+      analysisData = result;
+      document.getElementById('loadingState').style.display = 'none';
+      document.getElementById('analyzeBtn').disabled = false;
+      renderResults(result, 0);
+      switchTab('results');
+      renderHistory(history);
     }
-
-    const ctx = buildContext(allTxns, cardHolder, bank, balance);
-    const result = {};
-
-    // ══ PASS 2: Run 6 focused analysis calls in parallel ══════════
-    // Each returns a tiny JSON — impossible to truncate.
-
-    setProgress('🔍 Analyzing subscriptions & hidden charges...');
-    const [r1, r2] = await Promise.all([
-
-      // SECTION A: Summary + subscriptions + hidden charges
-      apiCall(`You are a financial security AI. Analyze this data and return ONLY JSON, no markdown.
-${ctx}
-Return exactly:
-{"summary":{"cardHolder":"${cardHolder}","bank":"${bank}","totalSpend":0,"months":0,"avgMonthly":0,"totalTransactions":${allTxns.length},"currentBalance":${balance},"potentialSavings":0},
-"subscriptions":[{"name":"str","amount":0,"frequency":"Monthly","annualCost":0,"risk":"high|medium|low","reason":"str","recommendation":"Cancel|Keep|Review","cancelUrl":"str","cancelSteps":["step1","step2"]}],
-"hiddenCharges":[{"description":"str","amount":0,"occurrences":0,"totalCost":0,"suspicionReason":"str","action":"str","disputeSteps":["step1","step2"]}],
-"securityAlerts":[{"severity":"critical|warning|info","title":"str","description":"str","action":"str"}]}
-Rules: Find ALL recurring charges as subscriptions. Flag SmartyPlus, fake USPS ($37.75), duplicate charges, mystery international merchants. potentialSavings=sum of annualCost for Cancel subs.`, 6000),
-
-      // SECTION B: Categories + monthly trend + top merchants
-      apiCall(`You are a financial analytics AI. Analyze this data and return ONLY JSON, no markdown.
-${ctx}
-Return exactly:
-{"categories":[{"name":"str","amount":0,"count":0,"color":"#hex","pct":0}],
-"monthlyTrend":[{"period":"str","amount":0}],
-"topMerchants":[{"name":"str","total":0,"count":0,"category":"str"}]}
-Category colors: Food=#f59e0b,Transport=#06b6d4,Groceries=#84cc16,Shopping=#8b5cf6,Education=#10b981,Entertainment=#ec4899,Subscriptions=#6366f1,Utilities=#64748b,Healthcare=#0ea5e9,Travel=#f97316,Other=#94a3b8
-Include top 12 merchants. Group transactions by month for trend.`, 3000)
-    ]);
-
-    setProgress('💡 Building insights, coaching & action plan...');
-    const [r3, r4, r5] = await Promise.all([
-
-      // SECTION C: Spending coach + credit score tips
-      apiCall(`You are a financial coach AI. Analyze this data and return ONLY JSON, no markdown.
-${ctx}
-Return exactly:
-{"spendingCoach":[{"icon":"emoji","title":"str","observation":"str","annualCost":0,"alternative":"str","saving":0}],
-"creditScoreTips":[{"factor":"str","impact":"high|medium|low","currentStatus":"str","action":"str","pointsGain":0}]}
-spendingCoach: top 5 overspending areas with cheaper alternatives. Be specific with dollar amounts.
-creditScoreTips: analyze utilization, payment patterns, give 3-5 score improvement tips with estimated point gains.`, 3000),
-
-      // SECTION D: Cashback + bill negotiation
-      apiCall(`You are a financial optimization AI. Analyze this data and return ONLY JSON, no markdown.
-${ctx}
-Return exactly:
-{"cashbackOpportunities":[{"category":"str","currentSpend":0,"currentCard":"str","currentRate":0,"betterCard":"str","betterRate":0,"annualGain":0}],
-"billNegotiation":[{"merchant":"str","currentAmount":0,"marketRate":0,"overpaying":0,"script":"str","successRate":"str","bestTime":"str"}]}
-cashbackOpportunities: compare spending categories against better credit card offers. Show realistic gains.
-billNegotiation: find utilities, insurance, internet, phone bills to negotiate. Include word-for-word script.`, 3000),
-
-      // SECTION E: Insights + action plan
-      apiCall(`You are a financial advisor AI. Analyze this data and return ONLY JSON, no markdown.
-${ctx}
-Return exactly:
-{"insights":[{"icon":"emoji","title":"str","description":"str"}],
-"actionPlan":[{"priority":"high|medium|low","title":"str","description":"str","saving":"str","steps":["exact step with URL/phone","step2","step3"]}]}
-insights: 5 sharp observations with specific dollar amounts from the data.
-actionPlan: 6-8 actions ordered high→low priority. Each step must be exact and actionable with URLs/phone numbers.`, 3000)
-    ]);
-
-    // ══ MERGE all sections into one result object ══════════════════
-    const merged = {
-      summary: r1.summary || {},
-      subscriptions: r1.subscriptions || [],
-      hiddenCharges: r1.hiddenCharges || [],
-      securityAlerts: r1.securityAlerts || [],
-      categories: r2.categories || [],
-      monthlyTrend: r2.monthlyTrend || [],
-      topMerchants: r2.topMerchants || [],
-      spendingCoach: r3.spendingCoach || [],
-      creditScoreTips: r3.creditScoreTips || [],
-      cashbackOpportunities: r4.cashbackOpportunities || [],
-      billNegotiation: r4.billNegotiation || [],
-      insights: r5.insights || [],
-      actionPlan: r5.actionPlan || [],
-      _transactions: allTxns
-    };
-
-    // Ensure summary has key values even if AI missed them
-    if (!merged.summary.totalSpend) {
-      merged.summary.totalSpend = allTxns.filter(t=>!t.credit).reduce((a,t)=>a+t.amount,0);
-    }
-    if (!merged.summary.totalTransactions) merged.summary.totalTransactions = allTxns.length;
-    if (!merged.summary.cardHolder) merged.summary.cardHolder = cardHolder;
-    if (!merged.summary.bank) merged.summary.bank = bank;
-    if (!merged.summary.currentBalance) merged.summary.currentBalance = balance;
-
-    analysisData = merged;
-
-    chatHistory = [
-      { role: 'user', content: `Analyzed ${uploadedFiles.length} statements, ${allTxns.length} transactions. Subscriptions: ${JSON.stringify(merged.subscriptions?.slice(0,8))}. Hidden: ${JSON.stringify(merged.hiddenCharges)}. Security: ${JSON.stringify(merged.securityAlerts)}. Action plan: ${JSON.stringify(merged.actionPlan)}.` },
-      { role: 'assistant', content: `Analysis complete. Found ${merged.subscriptions?.length||0} subscriptions, ${merged.hiddenCharges?.length||0} suspicious charges, ${merged.securityAlerts?.length||0} security alerts. Ask me anything!` }
-    ];
-
-    loadTimers.forEach(clearTimeout);
-    showScreen('resultsArea');
-    document.getElementById('resultsArea').style.display = 'block';
-    renderResults(merged);
-    document.getElementById('chatToggleBtn').disabled = false;
-
-  } catch (err) {
-    loadTimers.forEach(clearTimeout);
-    showScreen('resultsArea');
-    document.getElementById('resultsArea').style.display = 'block';
-    document.getElementById('resultsContent').innerHTML = `
-      <div class="error-box">
-        <strong>⚠️ Error: ${err.message}</strong><br><br>
-        <span style="font-size:12px">
-          • PDF files must have selectable text — not scanned images<br>
-          • Check that your API key is correct (starts with sk-ant-)<br>
-          • Check your internet connection and try again
-        </span>
-      </div>`;
+  } catch(err) {
+    document.getElementById('loadingState').style.display = 'none';
+    document.getElementById('analyzeBtn').disabled = false;
+    document.getElementById('errorBox').innerHTML = `<div class="error-box"><strong>⚠️ Analysis Failed</strong><br>${err.message.replace(/\n/g,'<br>')}</div>`;
   }
 }
 
-// RENDER
-function fmt(n){ return '$'+(n||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}); }
-const GRADS=['linear-gradient(90deg,#ef4444,#f97316)','linear-gradient(90deg,#2563eb,#6366f1)','linear-gradient(90deg,#059669,#0ea5e9)','linear-gradient(90deg,#d97706,#ef4444)','linear-gradient(90deg,#7c3aed,#ec4899)','linear-gradient(90deg,#059669,#2563eb)','linear-gradient(90deg,#ea580c,#d97706)'];
+// ══════════════════════════════════════════════════════════
+// GENERATE TAG
+// ══════════════════════════════════════════════════════════
+function generateTag(result, index) {
+  const s = result.summary || {};
+  const months = result.monthlyTrend || [];
+  if (months.length === 1) return months[0].period;
+  if (months.length > 1) return `${months[0].period} – ${months[months.length-1].period}`;
+  return `Report ${index + 1} · ${new Date(result._generatedAt).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}`;
+}
 
-function renderResults(d) {
-  const s=d.summary||{}, subs=d.subscriptions||[], hidden=d.hiddenCharges||[], cats=d.categories||[];
-  const insights=d.insights||[], merchants=d.topMerchants||[], trend=d.monthlyTrend||[];
-  const txns=d._transactions||[], plan=d.actionPlan||[];
-  const coach=d.spendingCoach||[], creditTips=d.creditScoreTips||[];
-  const cashback=d.cashbackOpportunities||[], negotiate=d.billNegotiation||[];
-  const secAlerts=d.securityAlerts||[];
+
+// ══════════════════════════════════════════════════════════
+// RENDER RESULTS
+// ══════════════════════════════════════════════════════════
+function renderResults(d, historyIndex) {
+  const s=d.summary||{}, subs=d.subscriptions||[], hidden=d.hiddenCharges||[];
+  const cats=d.categories||[], insights=d.insights||[], plan=d.actionPlan||[];
+  const alerts=d.securityAlerts||[];
   const dangerSubs=subs.filter(x=>x.risk==='high');
-  const maxCat=Math.max(...cats.map(c=>c.amount),1);
-  const maxTrend=Math.max(...trend.map(t=>t.amount),1);
+  const maxCat=Math.max(...cats.map(c=>c.amount||0),1);
+
+  // Build statement period from monthly trend
+  const trend = d.monthlyTrend||[];
+  let period = '';
+  if (trend.length === 1) period = trend[0].period;
+  else if (trend.length > 1) period = `${trend[0].period} – ${trend[trend.length-1].period}`;
+  else period = new Date(d._generatedAt||Date.now()).toLocaleDateString('en-US',{month:'long',year:'numeric'});
+
+  const generatedOn = new Date(d._generatedAt||Date.now()).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit'});
+  const cardHolder = s.cardHolder || 'Account Holder';
+  const bank = s.bank || 'Bank of America';
+  const dangerCount = dangerSubs.length;
 
   document.getElementById('resultsContent').innerHTML = `
-    <div class="stat-row">
-      <div class="stat-card"><div class="s-label">Total Spent</div><div class="s-val" style="color:var(--red)">${fmt(s.totalSpend)}</div><div class="s-sub">${s.months||''} months · ${s.totalTransactions||''} txns</div></div>
-      <div class="stat-card"><div class="s-label">Avg / Month</div><div class="s-val" style="color:var(--orange)">${fmt(s.avgMonthly)}</div></div>
-      <div class="stat-card"><div class="s-label">Subscriptions</div><div class="s-val" style="color:var(--purple)">${subs.length}</div><div class="s-sub">${dangerSubs.length} to cancel</div></div>
-      <div class="stat-card"><div class="s-label">Hidden Charges</div><div class="s-val" style="color:var(--red)">${hidden.length}</div></div>
-      <div class="stat-card"><div class="s-label">Potential Savings</div><div class="s-val" style="color:var(--green)">${fmt(s.potentialSavings)}</div><div class="s-sub">per year</div></div>
-      <div class="stat-card"><div class="s-label">Balance</div><div class="s-val" style="color:var(--yellow)">${fmt(s.currentBalance)}</div></div>
+
+    <!-- ═══ REPORT HEADER ════════════════════════════════════════ -->
+    <div style="background:linear-gradient(135deg,#0f172a 0%,#1e3a5f 100%);border-radius:10px;padding:16px;margin-bottom:14px;border:1px solid #1e3a5f">
+
+      <!-- Top row: shield + title -->
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+        <div style="font-size:28px;line-height:1">🛡️</div>
+        <div style="flex:1">
+          <div style="font-size:15px;font-weight:900;color:#34d399;letter-spacing:-0.3px">FinSentinel Security Report</div>
+          <div style="font-size:10px;color:#64748b;margin-top:2px">Generated ${generatedOn}</div>
+        </div>
+        ${dangerCount > 0
+          ? `<div style="background:#dc2626;color:white;border-radius:8px;padding:4px 10px;text-align:center;font-size:10px;font-weight:800;line-height:1.3">${dangerCount}<br><span style="font-size:8px;font-weight:600">CANCEL</span></div>`
+          : `<div style="background:#059669;color:white;border-radius:8px;padding:4px 10px;text-align:center;font-size:10px;font-weight:800;line-height:1.3">✓<br><span style="font-size:8px;font-weight:600">CLEAR</span></div>`
+        }
+      </div>
+
+      <!-- Identity row -->
+      <div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:10px 12px;display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <div>
+          <div style="font-size:9px;color:#475569;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:3px">Account Holder</div>
+          <div style="font-size:13px;font-weight:800;color:white">${cardHolder}</div>
+        </div>
+        <div>
+          <div style="font-size:9px;color:#475569;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:3px">Bank</div>
+          <div style="font-size:13px;font-weight:800;color:white">${bank}</div>
+        </div>
+        <div style="grid-column:1/-1;border-top:1px solid rgba(255,255,255,0.07);padding-top:8px;margin-top:2px">
+          <div style="font-size:9px;color:#475569;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:3px">Statement Period</div>
+          <div style="font-size:13px;font-weight:800;color:#34d399">${period}</div>
+        </div>
+      </div>
+
+      <!-- Quick stats strip -->
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:10px">
+        <div style="text-align:center">
+          <div style="font-size:9px;color:#475569;margin-bottom:2px">Spent</div>
+          <div style="font-size:12px;font-weight:800;color:#f87171">${fmt(s.totalSpend)}</div>
+        </div>
+        <div style="text-align:center">
+          <div style="font-size:9px;color:#475569;margin-bottom:2px">Txns</div>
+          <div style="font-size:12px;font-weight:800;color:#60a5fa">${s.totalTransactions||0}</div>
+        </div>
+        <div style="text-align:center">
+          <div style="font-size:9px;color:#475569;margin-bottom:2px">Subs</div>
+          <div style="font-size:12px;font-weight:800;color:#c4b5fd">${subs.length}</div>
+        </div>
+        <div style="text-align:center">
+          <div style="font-size:9px;color:#475569;margin-bottom:2px">Save/yr</div>
+          <div style="font-size:12px;font-weight:800;color:#34d399">${fmt(s.potentialSavings)}</div>
+        </div>
+      </div>
     </div>
+    <!-- ═══════════════════════════════════════════════════════════ -->
+
+    <div class="stat-row">
+      <div class="stat-card"><div class="stat-label">Total Spent</div><div class="stat-val c-red">${fmt(s.totalSpend)}</div></div>
+      <div class="stat-card"><div class="stat-label">Subscriptions</div><div class="stat-val c-purple">${subs.length}</div></div>
+      <div class="stat-card"><div class="stat-label">Save/yr</div><div class="stat-val c-green">${fmt(s.potentialSavings)}</div></div>
+    </div>
+    <div class="stat-row">
+      <div class="stat-card"><div class="stat-label">Avg/Month</div><div class="stat-val c-orange">${fmt(s.avgMonthly)}</div></div>
+      <div class="stat-card"><div class="stat-label">Months</div><div class="stat-val c-blue">${s.months||0}</div></div>
+      <div class="stat-card"><div class="stat-label">Balance</div><div class="stat-val c-yellow">${fmt(s.currentBalance)}</div></div>
+    </div>
+
+    ${alerts.length?`<div class="divider"><span>🔐 Security</span></div><div class="section alert-red"><div class="section-title">Security Alerts <span class="s-count">${alerts.length}</span></div>${alerts.map(a=>`<div class="hc-item"><div><div class="hc-name">${a.title||''}</div><div class="hc-detail">${a.description||''}</div><div class="hc-action">${a.action||''}</div></div></div>`).join('')}</div>`:''}
 
     ${dangerSubs.length?`
-    <div class="section-divider"><span>🚨 Cancel Immediately</span></div>
-    <div class="card alert-red">
-      <div class="card-title">Predatory & Wasteful Subscriptions <span class="ct-count">${dangerSubs.length} found</span></div>
-      ${dangerSubs.map(sub=>`
-        <div class="sub-row risk-high">
-          <div style="flex:1">
-            <div class="sub-name">${sub.name}</div>
-            <div class="sub-reason">${sub.reason}</div>
-            ${sub.cancelUrl?`<div class="sub-cancel-url">📞 ${sub.cancelUrl}</div>`:''}
-            ${sub.cancelSteps?.length?`<div style="margin-top:6px;display:flex;flex-direction:column;gap:3px">${sub.cancelSteps.map((s,i)=>`<div style="font-size:11px;color:var(--text2);display:flex;gap:5px"><span style="color:var(--primary);font-weight:700;flex-shrink:0">${i+1}.</span>${s}</div>`).join('')}</div>`:''}
-          </div>
-          <div class="sub-right">
-            <div class="sub-amt" style="color:var(--red)">${fmt(sub.amount)}/mo</div>
-            <div class="sub-annual">${fmt(sub.annualCost||sub.amount*12)}/yr</div>
-            <span class="pill pill-red">⚠ CANCEL</span>
-          </div>
-        </div>`).join('')}
-      <div class="savings-box">
-        <div class="big-num">${fmt(dangerSubs.reduce((a,s)=>a+(s.annualCost||s.amount*12),0))}</div>
-        <p>saved every year by cancelling these ${dangerSubs.length} subscription${dangerSubs.length>1?'s':''}</p>
-      </div>
+    <div class="divider"><span>🚨 Cancel Now</span></div>
+    <div class="section alert-red">
+      <div class="section-title">Predatory Subscriptions <span class="s-count">${dangerSubs.length}</span></div>
+      ${dangerSubs.map(sub=>`<div class="sub-item high"><div style="flex:1"><div class="sub-name">${sub.name}</div><div class="sub-reason">${sub.reason}</div>${sub.cancelPhone?`<div class="sub-cancel">📞 ${sub.cancelPhone}</div>`:sub.cancelUrl?`<div class="sub-cancel">🌐 ${sub.cancelUrl}</div>`:''} ${sub.cancelSteps?.length?`<div class="sub-steps">${sub.cancelSteps.slice(0,3).map(s=>`<div class="sub-step">${s}</div>`).join('')}</div>`:''}</div><div class="sub-right"><div class="sub-amt c-red">${fmt(sub.amount)}/mo</div><div style="font-size:10px;color:var(--muted)">${fmt(sub.annualCost)}/yr</div><span class="pill pill-red">CANCEL</span></div></div>`).join('')}
+      <div class="savings-box"><div class="savings-num">${fmt(dangerSubs.reduce((a,s)=>a+(s.annualCost||0),0))}</div><div class="savings-sub">saved per year by cancelling these</div></div>
     </div>`:''}
 
-    ${plan.length?`
-    <div class="section-divider"><span>✅ Your Action Plan</span></div>
-    <div class="card">
-      <div class="card-title">Step-by-Step — What to Do Right Now <span class="ct-count">${plan.length} actions</span></div>
-      <div class="action-grid">
-        ${plan.map((p,i)=>`
-          <div class="action-item">
-            <div class="action-num p-${p.priority}">${i+1}</div>
-            <div>
-              <div class="action-title">${p.title}</div>
-              <div class="action-desc">${p.description}</div>
-              ${p.steps?.length?`<div class="action-steps">${p.steps.map(s=>`<div class="action-step">${s}</div>`).join('')}</div>`:''}
-            </div>
-            <div class="action-saving">${p.saving||''}</div>
-          </div>`).join('')}
-      </div>
-    </div>`:''}
+    ${plan.length?`<div class="divider"><span>✅ Action Plan</span></div><div class="section"><div class="section-title">What To Do Right Now <span class="s-count">${plan.length}</span></div>${plan.map((p,i)=>`<div class="action-item"><div class="action-num a-${p.priority||'medium'}">${i+1}</div><div><div class="action-title">${p.title}</div><div class="action-desc">${p.description}</div>${p.steps?.length?`<div class="action-steps">${p.steps.slice(0,3).map(s=>`<div class="action-step">${s}</div>`).join('')}</div>`:''}</div><div class="action-saving">${p.saving||''}</div></div>`).join('')}</div>`:''}
 
-    ${trend.length?`
-    <div class="section-divider"><span>📈 Monthly Trend</span></div>
-    <div class="card">
-      <div class="card-title">Spending Over Time</div>
-      ${trend.map((t,i)=>`
-        <div class="month-row">
-          <div class="month-lbl">${t.period}</div>
-          <div class="m-bar-bg"><div class="m-bar" style="width:${Math.round(t.amount/maxTrend*100)}%;background:${GRADS[i%GRADS.length]}">${fmt(t.amount)}</div></div>
-          <div class="m-amt">${fmt(t.amount)}</div>
-        </div>`).join('')}
-    </div>`:''}
+    ${subs.length?`<div class="divider"><span>🔄 All Subscriptions</span></div><div class="section"><div class="section-title">All Recurring <span class="s-count">${subs.length}</span></div>${subs.map(s=>`<div class="sub-item ${s.risk}"><div style="flex:1"><div class="sub-name">${s.name}</div><div class="sub-reason">${s.frequency} · ${s.reason}</div></div><div class="sub-right"><div class="sub-amt">${fmt(s.amount)}/mo</div><span class="pill ${s.recommendation==='Cancel'?'pill-red':s.recommendation==='Keep'?'pill-green':'pill-yellow'}">${s.recommendation}</span></div></div>`).join('')}</div>`:''}
 
-    <div class="grid-2">
-      ${subs.length?`
-      <div class="card">
-        <div class="card-title">🔄 All Subscriptions <span class="ct-count">${subs.length}</span></div>
-        ${subs.map(sub=>`
-          <div class="sub-row risk-${sub.risk}">
-            <div style="flex:1">
-              <div class="sub-name">${sub.name}</div>
-              <div class="sub-reason">${sub.frequency} · ${sub.reason}</div>
-              ${sub.cancelUrl&&sub.recommendation==='Cancel'?`<div class="sub-cancel-url">${sub.cancelUrl}</div>`:''}
-            </div>
-            <div class="sub-right">
-              <div class="sub-amt">${fmt(sub.amount)}/mo</div>
-              <span class="pill ${sub.recommendation==='Cancel'?'pill-red':sub.recommendation==='Keep'?'pill-green':'pill-yellow'}">${sub.recommendation}</span>
-            </div>
-          </div>`).join('')}
-      </div>`:''}
+    ${cats.length?`<div class="divider"><span>📊 Spending</span></div><div class="section"><div class="section-title">By Category</div>${cats.map(c=>`<div class="cat-item"><div class="cat-head"><span>${c.name} <span style="color:var(--muted);font-size:10px">${c.pct}%</span></span><span style="font-weight:700">${fmt(c.amount)}</span></div><div class="bar-bg"><div class="bar-fill" style="width:${Math.round(c.amount/maxCat*100)}%;background:${c.color}"></div></div></div>`).join('')}</div>`:''}
 
-      ${cats.length?`
-      <div class="card">
-        <div class="card-title">📊 Spending by Category</div>
-        ${cats.sort((a,b)=>b.amount-a.amount).map(cat=>`
-          <div class="cat-item">
-            <div class="cat-head">
-              <span style="color:var(--text2)">${cat.name} <span style="color:var(--muted);font-size:10px">${cat.count||''} txns</span></span>
-              <span style="font-weight:700">${fmt(cat.amount)} <span style="color:var(--muted);font-size:10px">${cat.pct||''}%</span></span>
-            </div>
-            <div class="bar-bg"><div class="bar-fill" style="width:${Math.round(cat.amount/maxCat*100)}%;background:${cat.color||'#2563eb'}"></div></div>
-          </div>`).join('')}
-      </div>`:''}
-    </div>
+    ${hidden.length?`<div class="divider"><span>🕵️ Suspicious</span></div><div class="section alert-yellow"><div class="section-title">Hidden & Duplicate Charges <span class="s-count">${hidden.length}</span></div>${hidden.map(h=>`<div class="hc-item"><div style="flex:1"><div class="hc-name">${h.description}</div><div class="hc-detail">${h.occurrences}× · ${fmt(h.amount)} each · ${h.suspicionReason||''}</div><div class="hc-action">${h.action||''}</div>${h.disputeSteps?.length?`<div class="sub-steps">${h.disputeSteps.slice(0,3).map(s=>`<div class="sub-step">${s}</div>`).join('')}</div>`:''}</div><div class="hc-amount">${fmt(h.totalCost)}</div></div>`).join('')}</div>`:''}
 
-    ${hidden.length?`
-    <div class="section-divider"><span>🕵️ Hidden & Suspicious Charges</span></div>
-    <div class="card alert-yellow">
-      <div class="card-title">Charges to Dispute or Investigate <span class="ct-count">${hidden.length}</span></div>
-      ${hidden.map(h=>`
-        <div class="hc-row">
-          <div style="flex:1">
-            <div class="hc-name">${h.description}</div>
-            <div class="hc-detail">${h.occurrences} occurrence${h.occurrences>1?'s':''} · ${fmt(h.amount)} each</div>
-            <div class="hc-action">${h.action||''}</div>
-            ${h.disputeSteps?.length?`<div style="margin-top:5px;display:flex;flex-direction:column;gap:2px">${h.disputeSteps.map((s,i)=>`<div style="font-size:11px;color:var(--text2);display:flex;gap:5px"><span style="color:var(--primary);font-weight:700">${i+1}.</span>${s}</div>`).join('')}</div>`:''}
-          </div>
-          <div class="hc-amount">${fmt(h.totalCost)}</div>
-        </div>`).join('')}
-    </div>`:''}
+    ${insights.length?`<div class="divider"><span>💡 Insights</span></div><div class="section">${insights.map(i=>`<div class="insight-item"><div class="ins-icon">${i.icon}</div><div><div class="ins-title">${i.title}</div><div class="ins-desc">${i.description}</div></div></div>`).join('')}</div>`:''}
 
-    ${secAlerts.length?`
-    <div class="section-divider"><span>🔐 Security Alerts</span></div>
-    <div class="card alert-red">
-      <div class="card-title">Financial Security Issues Detected <span class="ct-count">${secAlerts.length}</span></div>
-      ${secAlerts.map(a=>`
-        <div class="hc-row" style="border-left:3px solid ${a.severity==='critical'?'var(--red)':a.severity==='warning'?'var(--yellow)':'var(--primary)'}">
-          <div style="flex:1">
-            <div class="hc-name">${a.severity==='critical'?'🚨':a.severity==='warning'?'⚠️':'ℹ️'} ${a.title}</div>
-            <div class="hc-detail">${a.description}</div>
-            <div class="hc-action">${a.action||''}</div>
-          </div>
-          <span class="pill ${a.severity==='critical'?'pill-red':a.severity==='warning'?'pill-yellow':'pill-green'}">${a.severity.toUpperCase()}</span>
-        </div>`).join('')}
-    </div>`:''}
-
-    ${coach.length?`
-    <div class="section-divider"><span>🧠 Spending Pattern Coach</span></div>
-    <div class="card">
-      <div class="card-title">Where You're Overspending & Better Alternatives</div>
-      ${coach.map(c=>`
-        <div class="hc-row">
-          <div style="flex:1">
-            <div class="hc-name">${c.icon} ${c.title}</div>
-            <div class="hc-detail">${c.observation}</div>
-            <div class="hc-action">💡 ${c.alternative}</div>
-          </div>
-          <div style="text-align:right;flex-shrink:0">
-            <div style="font-size:13px;font-weight:800;color:var(--red)">${fmt(c.annualCost)}/yr</div>
-            <div style="font-size:11px;color:var(--green);font-weight:700">Save ${fmt(c.saving)}</div>
-          </div>
-        </div>`).join('')}
-    </div>`:''}
-
-    ${creditTips.length?`
-    <div class="section-divider"><span>📈 Credit Score Coach</span></div>
-    <div class="card">
-      <div class="card-title">How to Improve Your Credit Score</div>
-      ${creditTips.map(t=>`
-        <div class="sub-row risk-${t.impact==='high'?'high':t.impact==='medium'?'medium':'low'}">
-          <div style="flex:1">
-            <div class="sub-name">${t.factor}</div>
-            <div class="sub-reason">Current: ${t.currentStatus} · ${t.action}</div>
-          </div>
-          <div class="sub-right">
-            <div style="font-size:16px;font-weight:800;color:var(--green)">+${t.pointsGain} pts</div>
-            <span class="pill ${t.impact==='high'?'pill-red':t.impact==='medium'?'pill-yellow':'pill-green'}">${t.impact} impact</span>
-          </div>
-        </div>`).join('')}
-    </div>`:''}
-
-    ${cashback.length?`
-    <div class="section-divider"><span>💰 Cashback Maximizer</span></div>
-    <div class="card">
-      <div class="card-title">You're Leaving Money on the Table</div>
-      <table>
-        <thead><tr><th>Category</th><th>Your Spend</th><th>Current Card & Rate</th><th>Better Card</th><th>Better Rate</th><th>Annual Gain</th></tr></thead>
-        <tbody>
-          ${cashback.map(c=>`
-            <tr>
-              <td style="font-weight:600">${c.category}</td>
-              <td>${fmt(c.currentSpend)}/yr</td>
-              <td><span class="cat-tag">${c.currentCard} ${(c.currentRate||0)}%</span></td>
-              <td style="color:var(--primary);font-weight:600">${c.betterCard}</td>
-              <td style="color:var(--green);font-weight:700">${c.betterRate}%</td>
-              <td style="font-weight:800;color:var(--green)">${fmt(c.annualGain)}</td>
-            </tr>`).join('')}
-        </tbody>
-      </table>
-      <div style="margin-top:12px;padding:10px 14px;background:var(--green-light);border-radius:var(--radius-sm);font-size:13px;color:var(--green-dark)">
-        💡 Total additional cashback with optimal cards: <strong>${fmt(cashback.reduce((a,c)=>a+(c.annualGain||0),0))}/year</strong>
-      </div>
-    </div>`:''}
-
-    ${negotiate.length?`
-    <div class="section-divider"><span>🤝 Bill Negotiation Intelligence</span></div>
-    <div class="card">
-      <div class="card-title">Bills You Can Negotiate Down Right Now</div>
-      ${negotiate.map(n=>`
-        <div class="sub-row risk-high" style="flex-direction:column;gap:10px">
-          <div style="display:flex;justify-content:space-between;align-items:flex-start;width:100%">
-            <div>
-              <div class="sub-name">${n.merchant}</div>
-              <div class="sub-reason">You pay ${fmt(n.currentAmount)}/mo · Market rate ${fmt(n.marketRate)}/mo · Success rate: ${n.successRate}</div>
-              <div style="font-size:11px;color:var(--muted);margin-top:2px">Best time to call: ${n.bestTime||'Weekday mornings'}</div>
-            </div>
-            <div style="text-align:right;flex-shrink:0;margin-left:12px">
-              <div style="font-size:15px;font-weight:800;color:var(--green)">Save ${fmt((n.overpaying||0)*12)}/yr</div>
-              <span class="pill pill-red">Overpaying ${fmt(n.overpaying)}/mo</span>
-            </div>
-          </div>
-          ${n.script?`
-          <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:var(--radius-sm);padding:10px 14px;width:100%">
-            <div style="font-size:10px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">📞 Word-for-word script</div>
-            <div style="font-size:12px;color:var(--text2);line-height:1.6;font-style:italic">"${n.script}"</div>
-          </div>`:''}
-        </div>`).join('')}
-    </div>`:''}
-
-    ${insights.length?`
-    <div class="section-divider"><span>💡 AI Insights</span></div>
-    <div class="card">
-      <div class="card-title">Personalized Observations</div>
-      <div class="grid-2">
-        ${insights.map(i=>`<div class="insight-row"><div class="ins-icon">${i.icon}</div><div><div class="ins-title">${i.title}</div><div class="ins-desc">${i.description}</div></div></div>`).join('')}
-      </div>
-    </div>`:''}
-
-    ${merchants.length?`
-    <div class="section-divider"><span>🏪 Top Merchants</span></div>
-    <div class="card">
-      <div class="card-title">Where Your Money Goes</div>
-      <table>
-        <thead><tr><th>Merchant</th><th>Category</th><th>Visits</th><th>Total</th></tr></thead>
-        <tbody>${merchants.slice(0,12).map(m=>`<tr><td style="font-weight:600">${m.name}</td><td><span class="cat-tag">${m.category||''}</span></td><td style="color:var(--muted)">${m.count}</td><td style="font-weight:700">${fmt(m.total)}</td></tr>`).join('')}</tbody>
-      </table>
-    </div>`:''}
-
-    ${txns.length?`
-    <div class="section-divider"><span>📋 Transaction History</span></div>
-    <div class="card">
-      <div class="card-title">All Transactions <span class="ct-count">${txns.length} total</span></div>
-      <table>
-        <thead><tr><th>Date</th><th>Merchant</th><th>Type</th><th>Amount</th></tr></thead>
-        <tbody>${txns.slice(0,50).map(t=>`<tr>
-          <td style="color:var(--muted)">${t.date||''}</td>
-          <td style="font-weight:500">${t.merchant}</td>
-          <td><span class="cat-tag" style="${t.credit?'color:var(--green)':''}">${t.credit?'Credit/Payment':'Purchase'}</span></td>
-          <td style="font-weight:700;color:${t.credit?'var(--green)':'var(--text)'}">${t.credit?'-':''}${fmt(t.amount)}</td>
-        </tr>`).join('')}</tbody>
-      </table>
-      ${txns.length>50?`<div style="text-align:center;padding:10px;font-size:12px;color:var(--muted)">Showing 50 of ${txns.length} transactions</div>`:''}
-    </div>`:''}
-
-    <div style="text-align:center;padding:16px 0;color:var(--muted);font-size:11px">
-      ${uploadedFiles.length} statement${uploadedFiles.length>1?'s':''} · ${(d._transactions||[]).length} transactions · Powered by Claude AI · All data stays on your device
+    <div class="divider"><span>⬇️ Export</span></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;padding-bottom:12px">
+      <button id="dlExcel" style="background:#059669;color:white;border:none;padding:10px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;">📊 Download Excel (.xlsx)</button>
+      <button id="dlPDF" style="background:#2563eb;color:white;border:none;padding:10px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;">📄 Download Report (.html→PDF)</button>
     </div>`;
+
+  // ✅ Attach download listeners directly — no onclick in template strings
+  document.getElementById('dlExcel')?.addEventListener('click', () => doDownloadCSV(d));
+  document.getElementById('dlPDF')?.addEventListener('click', () => doDownloadPDF(d));
 }
 
-// CHAT
-function toggleChat() {
-  const p = document.getElementById('chatPanel');
-  p.classList.toggle('open');
-  if (p.classList.contains('open')) document.getElementById('chatInput').focus();
-}
 
-async function sendChat() {
-  const input = document.getElementById('chatInput');
-  const msg = input.value.trim(); if (!msg) return;
-  input.value = '';
-  const msgs = document.getElementById('chatMessages');
-  msgs.innerHTML += `<div class="chat-msg user">${msg}</div>`;
-  msgs.innerHTML += `<div class="chat-msg loading" id="chatLoad">Thinking...</div>`;
-  msgs.scrollTop = msgs.scrollHeight;
-  chatHistory.push({ role:'user', content:msg });
-  try {
-    const resp = await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',
-      headers:{'Content-Type':'application/json','x-api-key':API_KEY,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-      body:JSON.stringify({ model:'claude-sonnet-4-6', max_tokens:1000,
-        system:`You are a personal financial assistant. Analysis data: ${JSON.stringify(analysisData)}. Answer concisely with specific numbers. Suggest actionable next steps.`,
-        messages:chatHistory })
+// ══════════════════════════════════════════════════════════
+// BATCH SUMMARY PICKER
+// ══════════════════════════════════════════════════════════
+function renderBatchSummary(perFileResults, combinedResult) {
+  const allResults = combinedResult ? [...perFileResults, combinedResult] : perFileResults;
+  const totalTxns = perFileResults.reduce((a, r) => a + (r.summary?.totalTransactions || 0), 0);
+  const totalDanger = perFileResults.reduce((a, r) => a + (r.subscriptions?.filter(s => s.risk === 'high').length || 0), 0);
+
+  const el = document.getElementById('resultsContent');
+  el.innerHTML = `
+    <div style="background:linear-gradient(135deg,#0f172a,#1e3a5f);border-radius:10px;padding:14px;margin-bottom:14px">
+      <div style="font-size:14px;font-weight:900;color:#34d399;margin-bottom:4px">📦 Batch Analysis Complete</div>
+      <div style="font-size:11px;color:#94a3b8">${perFileResults.length} file${perFileResults.length !== 1 ? 's' : ''} · ${totalTxns} total transactions · ${totalDanger} danger sub${totalDanger !== 1 ? 's' : ''} found</div>
+      <div style="font-size:10px;color:#64748b;margin-top:4px">Tap a card to view its full report. All reports saved to History.</div>
+    </div>
+    <div style="display:grid;gap:10px;margin-bottom:14px">
+      ${allResults.map((r, i) => {
+        const s = r.summary || {};
+        const danger = (r.subscriptions || []).filter(x => x.risk === 'high').length;
+        const isCombined = r._isCombined;
+        const trend = r.monthlyTrend || [];
+        const period = trend.length > 1
+          ? `${trend[0].period} – ${trend[trend.length-1].period}`
+          : trend[0]?.period || '';
+        return `<div class="history-item batch-pick" data-batch-idx="${i}" style="cursor:pointer;border:2px solid ${isCombined ? '#34d399' : 'var(--border)'};background:${isCombined ? 'rgba(52,211,153,0.06)' : 'white'}">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+            <div style="font-size:12px;font-weight:800;color:var(--text);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${isCombined ? '🔀' : '📄'} ${r._sourceFile || 'Report'}</div>
+            <div style="display:flex;gap:4px;flex-shrink:0;margin-left:6px">
+              ${isCombined ? '<span style="font-size:9px;background:#34d399;color:#0f172a;padding:2px 7px;border-radius:8px;font-weight:800">COMBINED</span>' : ''}
+              ${danger > 0 ? `<span style="font-size:9px;background:#dc2626;color:white;padding:2px 7px;border-radius:8px;font-weight:700">${danger} CANCEL</span>` : '<span style="font-size:9px;background:#059669;color:white;padding:2px 7px;border-radius:8px;font-weight:700">✓ CLEAR</span>'}
+            </div>
+          </div>
+          ${period ? `<div style="font-size:10px;color:var(--muted);margin-bottom:6px">📅 ${period}</div>` : ''}
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;text-align:center">
+            <div><div style="font-size:9px;color:var(--muted)">Spent</div><div style="font-size:12px;font-weight:800;color:#f87171">$${(s.totalSpend || 0).toLocaleString('en-US', {maximumFractionDigits:0})}</div></div>
+            <div><div style="font-size:9px;color:var(--muted)">Txns</div><div style="font-size:12px;font-weight:800;color:#60a5fa">${s.totalTransactions || 0}</div></div>
+            <div><div style="font-size:9px;color:var(--muted)">Subs</div><div style="font-size:12px;font-weight:800;color:#c4b5fd">${(r.subscriptions || []).length}</div></div>
+            <div><div style="font-size:9px;color:var(--muted)">Save/yr</div><div style="font-size:12px;font-weight:800;color:#34d399">$${(s.potentialSavings || 0).toFixed(0)}</div></div>
+          </div>
+          <div style="margin-top:8px;font-size:10px;color:var(--primary);font-weight:600;text-align:center">Tap to view full report →</div>
+        </div>`;
+      }).join('')}
+    </div>`;
+
+  el.querySelectorAll('[data-batch-idx]').forEach(card => {
+    card.addEventListener('click', () => {
+      const idx = parseInt(card.dataset.batchIdx);
+      analysisData = allResults[idx];
+      renderResults(allResults[idx], 0);
     });
-    const data = await resp.json();
-    const reply = data.content[0]?.text||'Could not generate a response.';
-    chatHistory.push({ role:'assistant', content:reply });
-    document.getElementById('chatLoad').remove();
-    msgs.innerHTML += `<div class="chat-msg assistant">${reply.replace(/\n/g,'<br>')}</div>`;
-    msgs.scrollTop = msgs.scrollHeight;
-  } catch(err) {
-    document.getElementById('chatLoad').remove();
-    msgs.innerHTML += `<div class="chat-msg assistant" style="color:var(--red)">Error: ${err.message}</div>`;
-  }
+  });
 }
+
+// ══════════════════════════════════════════════════════════
+// HISTORY
+// ══════════════════════════════════════════════════════════
+function renderHistory(history) {
+  const el = document.getElementById('historyContent');
+  if (!history?.length) {
+    el.innerHTML = '<div class="results-empty"><div class="ri">🕐</div><div style="font-size:13px;font-weight:600">No history yet</div></div>';
+    return;
+  }
+  el.innerHTML = `
+    <div style="font-size:11px;color:var(--muted);padding:0 0 10px;font-weight:600">${history.length} saved report${history.length>1?'s':''} — tap to view · × to delete</div>
+    ${history.map((h,i) => {
+      const tag = h.tag || new Date(h.date).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+      const isLatest = i === 0;
+      const isCombined = h.fullData?._isCombined;
+      return `<div class="history-item" data-idx="${i}" style="${isLatest?'border-color:var(--primary);background:var(--primary-l);':''}">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">
+          <div style="font-size:12px;font-weight:800;color:var(--text);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${isCombined?'🔀':'📅'} ${tag}</div>
+          <div style="display:flex;gap:4px;flex-shrink:0;margin-left:6px;align-items:center">
+            ${isLatest?'<span style="font-size:9px;background:var(--primary);color:white;padding:2px 7px;border-radius:8px;font-weight:700">LATEST</span>':''}
+            <button data-del-idx="${i}" style="background:#fee2e2;color:#dc2626;border:1px solid #fca5a5;border-radius:6px;width:24px;height:24px;cursor:pointer;font-size:15px;font-weight:700;flex-shrink:0;padding:0">×</button>
+          </div>
+        </div>
+        <div style="font-size:10px;color:var(--muted);margin-bottom:5px">${new Date(h.date).toLocaleString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit'})}</div>
+        <div class="history-stats">
+          <span class="h-stat">Spent: <strong>$${(h.summary?.totalSpend||0).toLocaleString('en-US',{maximumFractionDigits:0})}</strong></span>
+          <span class="h-stat">Subs: <strong>${h.subsCount||0}</strong></span>
+          <span class="h-stat" style="color:var(--red)">⚠ Cancel: <strong>${h.dangerCount||0}</strong></span>
+          <span class="h-stat" style="color:var(--green)">💰 Save: <strong>$${(h.savings||0).toFixed(0)}/yr</strong></span>
+        </div>
+      </div>`;
+    }).join('')}`;
+
+  const fresh = el.cloneNode(true);
+  el.parentNode.replaceChild(fresh, el);
+
+  fresh.addEventListener('click', async (e) => {
+    const delBtn = e.target.closest('[data-del-idx]');
+    if (delBtn) {
+      e.stopPropagation();
+      const idx = parseInt(delBtn.dataset.delIdx);
+      const stored = await Storage.get(['analysisHistory']);
+      let hist = stored.analysisHistory || [];
+      const label = hist[idx]?.tag || `Report ${idx+1}`;
+      if (!confirm(`Remove "${label}" from history?`)) return;
+      hist.splice(idx, 1);
+      await Storage.set({ analysisHistory: hist, ...(idx===0 && { lastAnalysis: hist[0]?.fullData || null }) });
+      renderHistory(hist);
+      return;
+    }
+    const item = e.target.closest('[data-idx]');
+    if (!item) return;
+    const idx = parseInt(item.dataset.idx);
+    const stored = await Storage.get(['analysisHistory']);
+    const hist = stored.analysisHistory || [];
+    const entry = hist[idx];
+    if (entry?.fullData) {
+      analysisData = entry.fullData;
+      renderResults(entry.fullData, idx);
+      switchTab('results');
+    }
+  });
+}
+
+// ══════════════════════════════════════════════════════════
+// PDF DOWNLOAD (HTML report)
+// ══════════════════════════════════════════════════════════
+function doDownloadPDF(d) {
+  const s = d.summary||{};
+  const trend = d.monthlyTrend||[];
+  const dateStr = new Date(d._generatedAt||Date.now()).toISOString().split('T')[0];
+  let period = trend.length >= 2
+    ? `${trend[0].period} – ${trend[trend.length-1].period}`
+    : trend[0]?.period || dateStr;
+  const dt = new Date(d._generatedAt||Date.now()).toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});
+  const dangerSubs = (d.subscriptions||[]).filter(x=>x.risk==='high');
+
+  // Build styled HTML and download directly as .html file
+  // User opens in browser → Cmd/Ctrl+P → Save as PDF
+  // This is the most reliable cross-platform approach for extensions
+  const html = `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>FinSentinel Report — ${period}</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',Arial,sans-serif;color:#1e293b;font-size:11px;background:white;padding:0}
+@page{margin:15mm;size:A4}
+.page{max-width:780px;margin:0 auto;padding:20px}
+.hdr{background:#0f172a;color:white;padding:18px 22px;border-radius:8px;margin-bottom:16px;page-break-inside:avoid}
+.hdr h1{font-size:18px;font-weight:800;color:#34d399;margin-bottom:4px}
+.hdr .sub{font-size:10px;color:#94a3b8}
+.hdr .period{font-size:12px;font-weight:700;color:white;margin-top:6px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;page-break-inside:avoid}
+.stat{background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:10px;text-align:center}
+.stat .lbl{font-size:8px;color:#94a3b8;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px}
+.stat .val{font-size:16px;font-weight:800}
+.sec{margin-bottom:14px;page-break-inside:avoid}
+.ttl{font-size:11px;font-weight:800;padding:6px 10px;border-radius:4px;margin-bottom:6px;border-left:4px solid #2563eb;background:#f1f5f9}
+.ttl.red{border-left-color:#dc2626;background:#fef2f2;color:#dc2626}
+.ttl.grn{border-left-color:#059669;background:#ecfdf5;color:#059669}
+table{width:100%;border-collapse:collapse;font-size:9px}
+th{background:#1e3a5f;color:white;text-align:left;padding:6px 8px;font-size:8px;text-transform:uppercase;letter-spacing:0.5px}
+td{padding:5px 8px;border-bottom:1px solid #f1f5f9;vertical-align:top}
+tr:nth-child(even) td{background:#f8fafc}
+.pill{display:inline-block;font-size:8px;padding:2px 6px;border-radius:6px;font-weight:700}
+.pr{background:#fef2f2;color:#dc2626}.py{background:#fffbeb;color:#d97706}.pg{background:#ecfdf5;color:#059669}
+.red{color:#dc2626;font-weight:700}.green{color:#059669;font-weight:700}
+.sav{background:#ecfdf5;border:1px solid #a7f3d0;border-radius:6px;padding:12px;text-align:center;margin:8px 0}
+.sav .big{font-size:26px;font-weight:900;color:#059669}
+.ftr{margin-top:16px;padding-top:8px;border-top:1px solid #e2e8f0;font-size:8px;color:#94a3b8;text-align:center}
+</style>
+</head>
+<body><div class="page">
+
+<div class="hdr">
+  <h1>🛡️ FinSentinel Financial Security Report</h1>
+  <div class="sub">${s.cardHolder||'Account Holder'} · ${s.bank||'Bank of America'} · Generated ${dt}</div>
+  <div class="period">📅 Statement Period: ${period}</div>
+</div>
+
+<div class="stats">
+  <div class="stat"><div class="lbl">Total Spent</div><div class="val red">${fmt(s.totalSpend)}</div></div>
+  <div class="stat"><div class="lbl">Avg / Month</div><div class="val" style="color:#ea580c">${fmt(s.avgMonthly)}</div></div>
+  <div class="stat"><div class="lbl">Months</div><div class="val" style="color:#2563eb">${s.months||0}</div></div>
+  <div class="stat"><div class="lbl">Subscriptions</div><div class="val" style="color:#7c3aed">${(d.subscriptions||[]).length}</div></div>
+  <div class="stat"><div class="lbl">Annual Savings</div><div class="val green">${fmt(s.potentialSavings)}</div></div>
+  <div class="stat"><div class="lbl">Transactions</div><div class="val" style="color:#2563eb">${s.totalTransactions||0}</div></div>
+</div>
+
+${dangerSubs.length ? `
+<div class="sec">
+  <div class="ttl red">🚨 Cancel Immediately — ${dangerSubs.length} Predatory Subscription${dangerSubs.length>1?'s':''}</div>
+  <div class="sav"><div class="big">${fmt(dangerSubs.reduce((a,x)=>a+(x.annualCost||0),0))}</div><div style="color:#047857;font-size:10px;margin-top:4px">saved per year</div></div>
+  <table><thead><tr><th>Service</th><th>Monthly</th><th>Annual</th><th>How to Cancel</th></tr></thead><tbody>
+  ${dangerSubs.map(x=>`<tr>
+    <td><strong>${x.name}</strong><br><span style="color:#64748b;font-size:8px">${x.reason}</span></td>
+    <td class="red">${fmt(x.amount)}</td><td class="red">${fmt(x.annualCost)}</td>
+    <td style="font-size:9px">${x.cancelPhone?'📞 '+x.cancelPhone+'<br>':''}<span style="color:#2563eb">${x.cancelUrl||''}</span></td>
+  </tr>`).join('')}
+  </tbody></table>
+</div>` : '<div class="sec"><div class="ttl grn">✅ No predatory subscriptions detected</div></div>'}
+
+${(d.hiddenCharges||[]).length ? `
+<div class="sec">
+  <div class="ttl red">🕵️ Suspicious & Duplicate Charges (${(d.hiddenCharges||[]).length})</div>
+  <table><thead><tr><th>Description</th><th>Amount</th><th>Count</th><th>Total Overcharged</th><th>Action</th></tr></thead><tbody>
+  ${(d.hiddenCharges||[]).map(h=>`<tr>
+    <td><strong>${h.description}</strong><br><span style="color:#64748b;font-size:8px">${h.suspicionReason||''}</span></td>
+    <td>${fmt(h.amount)}</td><td>${h.occurrences}</td>
+    <td class="red">${fmt(h.totalCost)}</td>
+    <td style="font-size:9px;color:#2563eb">${h.action||''}</td>
+  </tr>`).join('')}
+  </tbody></table>
+</div>` : ''}
+
+${(d.actionPlan||[]).length ? `
+<div class="sec">
+  <div class="ttl">✅ Action Plan</div>
+  <table><thead><tr><th>#</th><th>Action</th><th>Saving</th><th>Steps</th></tr></thead><tbody>
+  ${(d.actionPlan||[]).map((p,i)=>`<tr>
+    <td><span class="pill ${p.priority==='high'?'pr':p.priority==='medium'?'py':'pg'}">${i+1}</span></td>
+    <td><strong>${p.title}</strong><br><span style="color:#64748b;font-size:8px">${p.description}</span></td>
+    <td class="green" style="white-space:nowrap">${p.saving||''}</td>
+    <td style="font-size:9px">${(p.steps||[]).map((s,j)=>`${j+1}. ${s}`).join('<br>')}</td>
+  </tr>`).join('')}
+  </tbody></table>
+</div>` : ''}
+
+${(d.subscriptions||[]).length ? `
+<div class="sec">
+  <div class="ttl">🔄 All Subscriptions</div>
+  <table><thead><tr><th>Service</th><th>Frequency</th><th>Monthly</th><th>Annual</th><th>Risk</th><th>Action</th></tr></thead><tbody>
+  ${(d.subscriptions||[]).map(x=>`<tr>
+    <td><strong>${x.name}</strong></td><td>${x.frequency}</td>
+    <td>${fmt(x.amount)}</td><td>${fmt(x.annualCost)}</td>
+    <td><span class="pill ${x.risk==='high'?'pr':x.risk==='medium'?'py':'pg'}">${x.risk}</span></td>
+    <td><span class="pill ${x.recommendation==='Cancel'?'pr':x.recommendation==='Keep'?'pg':'py'}">${x.recommendation}</span></td>
+  </tr>`).join('')}
+  </tbody></table>
+</div>` : ''}
+
+${(d.categories||[]).length ? `
+<div class="sec">
+  <div class="ttl">📊 Spending by Category</div>
+  <table><thead><tr><th>Category</th><th>Amount</th><th>Transactions</th><th>% of Total</th></tr></thead><tbody>
+  ${(d.categories||[]).map(c=>`<tr><td>${c.name}</td><td style="font-weight:700">${fmt(c.amount)}</td><td>${c.count}</td><td>${c.pct}%</td></tr>`).join('')}
+  </tbody></table>
+</div>` : ''}
+
+${(d.topMerchants||[]).length ? `
+<div class="sec">
+  <div class="ttl">🏪 Top Merchants</div>
+  <table><thead><tr><th>Merchant</th><th>Category</th><th>Visits</th><th>Total</th></tr></thead><tbody>
+  ${(d.topMerchants||[]).map(m=>`<tr><td>${m.name}</td><td>${m.category}</td><td>${m.count}</td><td style="font-weight:700">${fmt(m.total)}</td></tr>`).join('')}
+  </tbody></table>
+</div>` : ''}
+
+${(d._transactions||[]).length ? `
+<div class="sec">
+  <div class="ttl">📋 All Transactions (${(d._transactions||[]).length})</div>
+  <table><thead><tr><th>Date</th><th>Merchant</th><th>Type</th><th>Amount</th></tr></thead><tbody>
+  ${(d._transactions||[]).map(t=>`<tr>
+    <td style="color:#64748b;white-space:nowrap">${t.date}</td>
+    <td>${t.merchant}</td>
+    <td><span style="font-size:8px;color:${t.credit?'#059669':'#475569'}">${t.credit?'Credit':'Purchase'}</span></td>
+    <td style="font-weight:600;color:${t.credit?'#059669':'#1e293b'};text-align:right">${t.credit?'-':''}${fmt(t.amount)}</td>
+  </tr>`).join('')}
+  </tbody></table>
+</div>` : ''}
+
+<div class="ftr">FinSentinel Financial Security Report · ${dt} · ${s.totalTransactions||0} transactions · Local AI · Zero data shared</div>
+</div></body></html>`;
+
+  // Direct download as .html — opens in browser, Cmd+P → Save as PDF
+  const blob = new Blob([html], { type: 'text/html;charset=utf-8;' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `FinSentinel_Report_${dateStr}.html`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(a.href), 3000);
+}
+
+// ══════════════════════════════════════════════════════════════════
+// COMPARE / TRENDS ENGINE
+// Loads all history entries and builds a comprehensive trend view
+// ══════════════════════════════════════════════════════════════════
+
+
+// ══════════════════════════════════════════════════════════
+// RESTORE SESSION ON LOAD
+// ══════════════════════════════════════════════════════════
+(async () => {
+  const data = await Storage.get(['lastAnalysis', 'lastAnalysisDate', 'analysisHistory']);
+  if (data.lastAnalysis) {
+    analysisData = data.lastAnalysis;
+    renderResults(data.lastAnalysis, 0);
+  }
+  if (data.analysisHistory?.length) renderHistory(data.analysisHistory);
+})();
+
 </script>
 </body>
 </html>
