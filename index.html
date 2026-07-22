@@ -861,11 +861,15 @@ function addLog(msg, type='active') {
 async function parseFile(file) {
   const ext = file.name.toLowerCase().split('.').pop();
   if (ext === 'pdf') {
-    const buf = await file.arrayBuffer();
-    const text = await extractPDFText(buf);
-    if (!text || text.trim().length < 50) return { txns: [], cardHolder: '', balance: 0, warn: 'scanned image PDF — no selectable text, download CSV instead' };
-    const parsed = parseText(text, file.name);
-    return { txns: parsed.txns, cardHolder: parsed.cardHolder, balance: parsed.balance };
+    try {
+      const buf = await file.arrayBuffer();
+      const text = await extractPDFText(buf);
+      if (!text || text.trim().length < 50) return { txns: [], cardHolder: '', balance: 0, warn: file.name + ': scanned image PDF — no selectable text. Try downloading as CSV from your bank.' };
+      const parsed = parseText(text, file.name);
+      return { txns: parsed.txns, cardHolder: parsed.cardHolder, balance: parsed.balance };
+    } catch(e) {
+      throw new Error('Failed to read ' + file.name + '.\n\nMost likely: PDF library could not load. Try a CSV file instead, or check your internet connection.\n\nDetail: ' + (e.message || e));
+    }
   } else {
     return { txns: parseCSV(await file.text(), file.name), cardHolder: '', balance: 0 };
   }
@@ -958,7 +962,10 @@ async function runAnalysis() {
   } catch(err) {
     document.getElementById('loadingState').style.display = 'none';
     document.getElementById('analyzeBtn').disabled = false;
-    document.getElementById('errorBox').innerHTML = `<div class="error-box"><strong>⚠️ Analysis Failed</strong><br>${err.message.replace(/\n/g,'<br>')}</div>`;
+    const msg = err instanceof Error ? err.message
+              : (err && err.type) ? 'Failed to load PDF library — check internet connection or try a CSV file instead'
+              : String(err || 'Unknown error');
+    document.getElementById('errorBox').innerHTML = `<div class="error-box"><strong>⚠️ Analysis Failed</strong><br>${msg.replace(/\n/g,'<br>')}</div>`;
   }
 }
 
