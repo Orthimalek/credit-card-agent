@@ -447,7 +447,7 @@ async function loadPDFJS() {
   // Already loaded from a previous call
   if (window.pdfjsLib) {
     window.pdfjsLib.GlobalWorkerOptions.workerSrc =
-      'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.worker.min.js';
+      'https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
     pdfjs = window.pdfjsLib;
     return pdfjs;
   }
@@ -456,29 +456,49 @@ async function loadPDFJS() {
   if (document.body.classList.contains('offline-mode')) {
     throw new Error(
       'PDF files cannot be parsed in Offline Mode (PDF library requires internet to load).\n\n' +
-      '✅ Solutions:\n' +
+      'Solutions:\n' +
       '1. Switch to Online Mode (toggle the slider) and try again.\n' +
-      '2. Download your statement as a CSV from your bank app — CSV works fully offline.'
+      '2. Download your statement as a CSV from your bank — CSV works fully offline.'
     );
   }
 
-  // Load PDF.js from CDN (online mode only)
-  await new Promise((resolve, reject) => {
-    const s = document.createElement('script');
-    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.min.js';
-    s.onload = resolve;
-    s.onerror = () => reject(new Error(
-      'Could not load PDF library from internet.\n\n' +
-      '✅ Solutions:\n' +
-      '1. Check your internet connection and try again.\n' +
-      '2. Download your statement as a CSV from your bank app — CSV works without internet.'
-    ));
-    document.head.appendChild(s);
-  });
+  // Try multiple CDNs in order until one works
+  const SOURCES = [
+    'https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.min.js',
+    'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js',
+    'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js',
+  ];
+  const WORKERS = [
+    'https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js',
+    'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js',
+    'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js',
+  ];
 
-  window.pdfjsLib.GlobalWorkerOptions.workerSrc =
-    'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.worker.min.js';
-  pdfjs = window.pdfjsLib;
+  let loaded = false;
+  for (let i = 0; i < SOURCES.length; i++) {
+    try {
+      await new Promise((resolve, reject) => {
+        const s = document.createElement('script');
+        s.src = SOURCES[i];
+        s.onload = resolve;
+        s.onerror = reject;
+        document.head.appendChild(s);
+      });
+      window.pdfjsLib.GlobalWorkerOptions.workerSrc = WORKERS[i];
+      pdfjs = window.pdfjsLib;
+      loaded = true;
+      break;
+    } catch(e) {
+      if (i === SOURCES.length - 1) {
+        throw new Error(
+          'Could not load PDF library from any source.\n\n' +
+          'Solutions:\n' +
+          '1. Check your internet connection and refresh the page.\n' +
+          '2. Download your statement as a CSV from your bank — CSV works without internet.'
+        );
+      }
+    }
+  }
   return pdfjs;
 }
 
@@ -1439,7 +1459,7 @@ function toggleMode() {
     try { localStorage.setItem('fs_mode', 'offline'); } catch(e) {}
   } else {
     document.body.classList.remove('offline-mode');
-    pdfjs = null; // reset so it reloads from CDN on next PDF upload
+    pdfjs = null; // reset so it reloads fresh
     if (label) { label.textContent = '🌐 Online'; }
     if (indicator) indicator.innerHTML = '🌐 <strong style="color:#34d399">Online Mode</strong>';
     try { localStorage.setItem('fs_mode', 'online'); } catch(e) {}
